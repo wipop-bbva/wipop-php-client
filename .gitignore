@@ -1,0 +1,175 @@
+# Archivos y carpetas de dependencias
+/vendor/
+composer.lock
+
+# Archivos de configuración de IDEs
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Archivos temporales y de sistema
+*.swp
+*.swo
+*.tmp
+*.bak
+*.old
+*.orig
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Archivos de logs
+*.log
+
+# Archivos de caché
+.cache/
+*.cache
+
+# Archivos de entorno
+.env
+.env.*
+
+# Archivos de PHPUnit
+.phpunint.cache
+
+# Archivos de cobertura de código
+coverage/
+*.cov
+
+# Archivos de salida de depuración
+*.out
+
+# Archivos de configuración de MacOS
+.AppleDouble
+.LSOverride
+
+# Archivos de configuración de Linux
+*~
+
+# Archivos de configuración de Windows
+$RECYCLE.BIN/
+
+# Archivos de configuración de otros editores
+*.komodoproject
+*.tmproj
+*.project
+
+# Archivos de configuración de NetBeans
+nbproject/
+
+# Archivos de configuración de Eclipse
+*.launch
+.settings/
+
+# Archivos de configuración de JetBrains
+*.iml
+
+# Archivos de configuración de Visual Studio
+*.vspscc
+*.vssscc
+*.user
+*.suo
+*.ntvs_analysis.dat
+*.njsproj
+*.sln
+*.psess
+*.vsp
+*.vs/
+
+# Archivos de configuración de Xcode
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj
+
+# Archivos de configuración de Android Studio
+*.gradle
+*.idea/
+*.iml
+
+# Archivos de configuración de Emacs
+*~
+#*#
+
+# Archivos de configuración de Vim
+*.swp
+*.swo
+
+# Archivos de configuración de VSCode
+.vscode/
+
+# Archivos de configuración de Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Archivos de configuración de PHPStorm
+*.idea/
+
+# Archivos de configuración de otros IDEs
+*.code-workspace
+
+# Archivos de configuración de backup
+*.bak
+*.tmp
+*.temp
+
+# Archivos de configuración de logs
+*.log
+
+# Archivos de configuración de caché
+.cache/
+
+# Archivos de configuración de entorno
+.env
+
+# Archivos de configuración de cobertura
+coverage/
+
+# Archivos de configuración de salida
+*.out
+
+# Archivos de configuración de Apple
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Archivos de configuración de Linux
+*~
+
+# Archivos de configuración de Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Archivos de configuración de NetBeans
+nbproject/
+
+# Archivos de configuración de Eclipse
+.settings/
+*.launch
+
+# Archivos de configuración de JetBrains
+*.iml
+
+# Archivos de configuración de Visual Studio
+*.vspscc
+*.vssscc
+*.user
+*.suo
+*.ntvs_analysis.dat
+*.njsproj
+*.sln
+*.psess
+*.vsp
+*.vs/
+
+# Archivos de configuración de Xcode
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj
+
+# Archivos de configuración de Android Studio
+*.gradle
+*.idea/
+*.iml
+
