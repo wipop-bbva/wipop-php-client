@@ -173,3 +173,5 @@ nbproject/
 *.idea/
 *.iml
 
+# Archivos de phpStan 
+var/phpstan

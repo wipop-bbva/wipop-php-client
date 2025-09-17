@@ -1,0 +1,9 @@
+parameters:
+    level: max
+    paths:
+        - src
+        - tests
+    reportUnmatchedIgnoredErrors: true
+    treatPhpDocTypesAsCertain: true
+    checkImplicitMixed: true
+    tmpDir: var/phpstan
