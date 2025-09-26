@@ -26,3 +26,24 @@ jobs:
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --colors=always --testdox
+
+  security:
+    name: Composer Audit for prod deps
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer
+
+      - name: Install prod deps
+        run: composer install --no-dev --no-progress --prefer-dist --no-interaction
+
+      - name: Audit composer.lock
+        run: composer audit --no-dev --locked
