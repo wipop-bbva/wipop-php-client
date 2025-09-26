@@ -15,10 +15,11 @@
   },
   "require-dev": {
     "phpunit/phpunit": "10.5.53",
+    "squizlabs/php_codesniffer": "4.0",
     "phpstan/phpstan": "2.1"
   },
   "scripts": {
+    "lint:phpcs": "phpcs",
     "lint:phpstan": "phpstan analyse --memory-limit=1G"
   }
-  
 }
