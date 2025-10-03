@@ -1,15 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Wipop\Checkout;
+
+use LogicException;
 
 final class CheckoutService
 {
     /**
-     * @param Checkout $checkout
-     * @return CheckoutResponse
+     * @todo Implement API call returning CheckoutResponse
+     *
+     * @throws LogicException until implemented
      */
     public function pay(Checkout $checkout): CheckoutResponse
     {
-        // TODO: Implement API call and handle response
+        throw new LogicException('CheckoutService::pay is not implemented yet');
     }
 }

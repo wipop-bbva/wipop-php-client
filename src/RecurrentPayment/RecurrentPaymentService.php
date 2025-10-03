@@ -1,15 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Wipop\RecurrentPayment;
+
+use LogicException;
 
 class RecurrentPaymentService
 {
     /**
-     * @param RecurrentPayment $recurrentPayment
-     * @return RecurrentPaymentResponse
+     * @todo Implement API call returning RecurrentPaymentResponse
+     *
+     * @throws LogicException until implemented
      */
     public function pay(RecurrentPayment $recurrentPayment): RecurrentPaymentResponse
     {
-        // TODO: Implement API call and handle response
+        throw new LogicException('RecurrentPaymentService::pay is not implemented yet');
     }
 }

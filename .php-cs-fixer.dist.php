@@ -25,6 +25,7 @@ return (new Config())
         '@PHP81Migration' => true,
         'no_unused_imports' => true,
         'linebreak_after_opening_tag' => false,
+        'single_line_empty_body' => false,
         'single_quote' => true,
         'declare_strict_types' => true,
         'array_syntax' => ['syntax' => 'short'],

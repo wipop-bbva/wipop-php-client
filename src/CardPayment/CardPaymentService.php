@@ -1,15 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Wipop\CardPayment;
+
+use LogicException;
 
 final class CardPaymentService
 {
     /**
-     * @param CardPayment $cardPayment
-     * @return CardPaymentResponse
+     * @todo Implement API call returning CardPaymentResponse
+     *
+     * @throws LogicException until implemented
      */
     public function pay(CardPayment $cardPayment): CardPaymentResponse
     {
-        // TODO: Implement API call and handle response
+        throw new LogicException('CardPaymentService::pay is not implemented yet');
     }
 }

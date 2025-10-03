@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Wipop\Client;
 
@@ -19,9 +21,6 @@ final class WipopClient
     private readonly RecurrentPaymentService $recurrentPaymentService;
     private readonly ClientConfiguration $configuration;
 
-    /**
-     * @param ClientConfiguration $configuration
-     */
     public function __construct(ClientConfiguration $configuration)
     {
         $this->configuration = $configuration;
@@ -30,38 +29,23 @@ final class WipopClient
         $this->recurrentPaymentService = new RecurrentPaymentService();
     }
 
-    /**
-     * @return ClientConfiguration
-     */
     public function getConfiguration(): ClientConfiguration
     {
         return $this->configuration;
     }
 
-    /**
-     * @param Checkout $checkout
-     * @return CheckoutResponse
-     */
     public function checkoutPayment(Checkout $checkout): CheckoutResponse
     {
-        $response = $this->checkoutService->pay($checkout);
+        return $this->checkoutService->pay($checkout);
     }
 
-    /**
-     * @param CardPayment $cardPayment
-     * @return CardPaymentResponse
-     */
     public function cardPayment(CardPayment $cardPayment): CardPaymentResponse
     {
-        $response = $this->cardPaymentService->pay($cardPayment);
+        return $this->cardPaymentService->pay($cardPayment);
     }
 
-    /**
-     * @param RecurrentPayment $recurrentPayment
-     * @return RecurrentPaymentResponse
-     */
     public function recurrentPayment(RecurrentPayment $recurrentPayment): RecurrentPaymentResponse
     {
-        $response = $this->recurrentPaymentService->pay($recurrentPayment);
+        return $this->recurrentPaymentService->pay($recurrentPayment);
     }
 }

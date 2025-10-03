@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Wipop\Utils;
 
 final class Currency
 {
-    const EUR = 'EUR';
+    public const EUR = 'EUR';
 }

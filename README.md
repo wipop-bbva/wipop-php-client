@@ -42,6 +42,13 @@ $cardService = new CardPaymentService($client);
 
 Las contribuciones son bienvenidas. Por favor, abre un issue o envía un pull request para sugerencias o mejoras.
 
+## Flujo de calidad del código
+
+- PHPStan (`composer lint:phpstan`) analiza el código en busca de errores de tipos y comportamiento. GrumPHP lo ejecuta automáticamente en cada commit.
+- php-cs-fixer (`composer fix:php`) formatea el código según `.php-cs-fixer.dist.php`. GrumPHP comprueba en modo dry-run que los archivos están alineados antes de permitir el commit.
+- GrumPHP instala los hooks de Git y coordina los chequeos anteriores para que todos los commits pasen por las mismas validaciones.
+- PHPCS (`composer lint:phpcs`) herramienta opcional para análisis puntual.No se ejecuta automáticamente en los hooks.
+
 ## Licencia
 
 Este proyecto está bajo la licencia MIT.

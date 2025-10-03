@@ -1,15 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace RecurrentPayment;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 use Wipop\CardPayment\OriginChannel;
 use Wipop\RecurrentPayment\RecurrentPayment;
-use PHPUnit\Framework\TestCase;
 use Wipop\Utils\OrderId;
 use Wipop\Utils\PaymentMethod;
 use Wipop\Utils\ProductType;
 
+/**
+ * @internal
+ */
 #[CoversClass(RecurrentPayment::class)]
 class RecurrentPaymentTest extends TestCase
 {

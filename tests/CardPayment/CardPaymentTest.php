@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -6,6 +8,9 @@ use PHPUnit\Framework\TestCase;
 use Wipop\CardPayment\CardPayment;
 use Wipop\Utils\Terminal;
 
+/**
+ * @internal
+ */
 #[CoversClass(CardPayment::class)]
 class CardPaymentTest extends TestCase
 {

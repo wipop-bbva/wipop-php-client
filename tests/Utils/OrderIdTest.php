@@ -1,10 +1,15 @@
-<?php declare(strict_types=1);
+<?php
 
-use PHPUnit\Framework\Attributes\Test;
+declare(strict_types=1);
+
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Wipop\Utils\OrderId;
 
+/**
+ * @internal
+ */
 #[CoversClass(OrderId::class)]
 class OrderIdTest extends TestCase
 {
@@ -22,7 +27,7 @@ class OrderIdTest extends TestCase
     #[Test]
     public function itShouldThrowAnExceptionIfOrderIdIsNotValid(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         new OrderId(self::INVALID_ORDER_ID);
     }
 }
