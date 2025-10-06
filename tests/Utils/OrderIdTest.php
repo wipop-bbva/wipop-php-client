@@ -30,4 +30,36 @@ class OrderIdTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         new OrderId(self::INVALID_ORDER_ID);
     }
+
+    #[Test]
+    public function itShouldCreateAnOrderIdUsingNamedConstructor(): void
+    {
+        $orderId = OrderId::fromString(self::VALID_ORDER_ID);
+
+        $this->assertSame(self::VALID_ORDER_ID, $orderId->getOrderId());
+    }
+
+    #[Test]
+    public function itShouldThrowAnExceptionWhenOrderIdIsTooShort(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new OrderId('1234abcde12');
+    }
+
+    #[Test]
+    public function itShouldThrowAnExceptionWhenOrderIdIsTooLong(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new OrderId('1234abcdefghi');
+    }
+
+    #[Test]
+    public function itShouldThrowAnExceptionWhenOrderIdContainsInvalidCharacters(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new OrderId('1234abcde-fg');
+    }
 }
