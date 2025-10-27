@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Utils;
+namespace Wipop\Utils;
 
 class ChargeStatus
 {

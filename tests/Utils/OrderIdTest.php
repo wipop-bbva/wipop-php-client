@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+namespace Wipop\Tests\Utils;
+
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +24,7 @@ class OrderIdTest extends TestCase
     {
         $orderId = new OrderId(self::VALID_ORDER_ID);
         $this->assertInstanceOf(OrderId::class, $orderId);
-        $this->assertEquals(self::VALID_ORDER_ID, $orderId->getOrderId());
+        $this->assertEquals(self::VALID_ORDER_ID, $orderId->value());
     }
 
     #[Test]
@@ -36,7 +39,7 @@ class OrderIdTest extends TestCase
     {
         $orderId = OrderId::fromString(self::VALID_ORDER_ID);
 
-        $this->assertSame(self::VALID_ORDER_ID, $orderId->getOrderId());
+        $this->assertSame(self::VALID_ORDER_ID, $orderId->value());
     }
 
     #[Test]

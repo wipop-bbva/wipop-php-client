@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Wipop\Utils;
 
 use InvalidArgumentException;
+use Stringable;
 
-final class OrderId
+final class OrderId implements Stringable
 {
     public const VALIDATION_REGEX = '^\d{4}[a-zA-Z0-9]{8}$';
     private readonly string $orderId;
@@ -20,7 +21,12 @@ final class OrderId
         $this->orderId = $orderId;
     }
 
-    public function getOrderId(): string
+    public function __toString()
+    {
+        return $this->orderId;
+    }
+
+    public function value(): string
     {
         return $this->orderId;
     }
@@ -32,7 +38,7 @@ final class OrderId
 
     private function isValid(string $orderId): bool
     {
-        return preg_match('/'.self::VALIDATION_REGEX.'/', $orderId) === 1;
+        return preg_match('/' . self::VALIDATION_REGEX . '/', $orderId) === 1;
         // return preg_match(self::VALIDATION_REGEX, $orderId);
     }
 }
