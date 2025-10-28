@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Wipop\Checkout\Response;
 
 use DateTimeImmutable;
-use DateTimeInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Wipop\Customer\Customer;
@@ -59,7 +58,7 @@ final class CustomerFactory
      *     external_id: null|string,
      *     phone_number: null|string,
      *     address: null|array<string, mixed>,
-     *     creation_date: null|DateTimeInterface|string
+     *     creation_date: null|string
      * }
      */
     private function resolvePayload(array $payload): array
