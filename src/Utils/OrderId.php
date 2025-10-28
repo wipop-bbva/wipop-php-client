@@ -39,6 +39,5 @@ final class OrderId implements Stringable
     private function isValid(string $orderId): bool
     {
         return preg_match('/' . self::VALIDATION_REGEX . '/', $orderId) === 1;
-        // return preg_match(self::VALIDATION_REGEX, $orderId);
     }
 }
