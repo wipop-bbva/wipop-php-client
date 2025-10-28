@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Wipop\Checkout\Response;
 
 use DateTimeImmutable;
+use DateTimeInterface;
+use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Wipop\Customer\Customer;
 
 final class CustomerFactory
@@ -29,40 +32,66 @@ final class CustomerFactory
             );
         }
 
-        $name = isset($payload['name']) && is_string($payload['name'])
-            ? $payload['name']
-            : '';
-        $lastName = isset($payload['last_name']) && is_string($payload['last_name'])
-            ? $payload['last_name']
-            : '';
-        $email = isset($payload['email']) && is_string($payload['email'])
-            ? $payload['email']
-            : '';
-        $publicId = isset($payload['public_id']) && is_string($payload['public_id'])
-            ? $payload['public_id']
-            : null;
-        $externalId = isset($payload['external_id']) && is_string($payload['external_id'])
-            ? $payload['external_id']
-            : null;
-        $phoneNumber = isset($payload['phone_number']) && is_string($payload['phone_number'])
-            ? $payload['phone_number']
-            : null;
-        /** @var null|array<string, mixed> $addressPayload */
-        $addressPayload = isset($payload['address']) && is_array($payload['address'])
-            ? $payload['address'] : null;
-        $creationDate = isset($payload['creation_date']) && is_string($payload['creation_date'])
-            ? new DateTimeImmutable($payload['creation_date'])
-            : null;
+        $data = $this->resolvePayload($payload);
+        $creationDate = $data['creation_date'] !== null
+            ? new DateTimeImmutable($data['creation_date']) : null;
+
+        $addressPayload = $data['address'];
 
         return new Customer(
-            $name,
-            $lastName,
-            $email,
-            $publicId,
-            $externalId,
-            $phoneNumber,
+            $data['name'],
+            $data['last_name'],
+            $data['email'],
+            $data['public_id'],
+            $data['external_id'],
+            $data['phone_number'],
             $this->addressFactory->fromArray($addressPayload),
             $creationDate,
         );
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     *
+     * @return array{
+     *     name: string,
+     *     last_name: string,
+     *     email: string,
+     *     public_id: null|string,
+     *     external_id: null|string,
+     *     phone_number: null|string,
+     *     address: null|array<string, mixed>,
+     *     creation_date: null|DateTimeInterface|string
+     * }
+     */
+    private function resolvePayload(array $payload): array
+    {
+        $resolver = new OptionsResolver();
+        $resolver->setDefaults([
+            'name' => '',
+            'last_name' => '',
+            'email' => '',
+            'public_id' => null,
+            'external_id' => null,
+            'phone_number' => null,
+            'address' => null,
+            'creation_date' => null,
+        ]);
+
+        foreach (['name', 'last_name', 'email'] as $key) {
+            $resolver->setAllowedTypes($key, ['null', 'string']);
+            $resolver->setNormalizer($key, function (Options $options, mixed $value): string {
+                return $value ?? '';
+            });
+        }
+
+        foreach (['public_id', 'external_id', 'phone_number'] as $key) {
+            $resolver->setAllowedTypes($key, ['null', 'string']);
+        }
+
+        $resolver->setAllowedTypes('address', ['null', 'array']);
+        $resolver->setAllowedTypes('creation_date', ['null', 'string']);
+
+        return $resolver->resolve($payload);
     }
 }

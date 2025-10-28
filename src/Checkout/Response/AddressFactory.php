@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Wipop\Checkout\Response;
 
+use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Wipop\Customer\Address;
 
 final class AddressFactory
@@ -17,19 +19,46 @@ final class AddressFactory
             return null;
         }
 
-        $address = isset($payload['address']) && is_string($payload['address']) ? $payload['address'] : '';
-        $zipCode = isset($payload['zip_code']) && is_string($payload['zip_code']) ? $payload['zip_code'] : '';
-        $city = isset($payload['city']) && is_string($payload['city']) ? $payload['city'] : '';
-        $state = isset($payload['state']) && is_string($payload['state']) ? $payload['state'] : '';
-        $countryCode = isset($payload['country_code']) && is_string($payload['country_code'])
-            ? $payload['country_code'] : '';
+        $data = $this->resolvePayload($payload);
 
         return new Address(
-            $address,
-            $zipCode,
-            $city,
-            $state,
-            $countryCode
+            $data['address'],
+            $data['zip_code'],
+            $data['city'],
+            $data['state'],
+            $data['country_code']
         );
+    }
+
+    /**
+     * @param array<string,mixed> $payload
+     *
+     * @return array{
+     *   address: string,
+     *   zip_code: string,
+     *   city: string,
+     *   state: string,
+     *   country_code: string
+     * }
+     */
+    private function resolvePayload(array $payload): array
+    {
+        $resolver = new OptionsResolver();
+        $resolver->setDefaults([
+            'address' => '',
+            'zip_code' => '',
+            'city' => '',
+            'state' => '',
+            'country_code' => '',
+        ]);
+
+        foreach (['address', 'zip_code', 'city', 'state', 'country_code'] as $key) {
+            $resolver->setAllowedTypes($key, ['null', 'string']);
+            $resolver->setNormalizer($key, function (Options $options, mixed $value): string {
+                return $value ?? '';
+            });
+        }
+
+        return $resolver->resolve($payload);
     }
 }

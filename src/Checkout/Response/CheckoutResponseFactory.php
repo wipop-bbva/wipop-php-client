@@ -6,6 +6,9 @@ namespace Wipop\Checkout\Response;
 
 use DateTimeImmutable;
 use JsonException;
+use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
+use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Wipop\Checkout\CheckoutResponse;
 use Wipop\Utils\OrderId;
 
@@ -25,30 +28,24 @@ final class CheckoutResponseFactory
      */
     public function fromArray(array $payload): CheckoutResponse
     {
-        $id = $this->expectString($payload, 'id');
-        $amount = $this->expectNumeric($payload, 'amount');
-        $status = $this->expectString($payload, 'status');
-        $checkoutLink = $this->expectString($payload, 'checkout_link');
-        $creationDate = $this->expectString($payload, 'creation_date');
-        $expirationDate = $this->expectString($payload, 'expiration_date');
-        $orderId = $this->expectString($payload, 'order_id');
-        $description = isset($payload['description']) && is_string($payload['description'])
-            ? $payload['description']
-            : '';
+        try {
+            $data = $this->resolvePayload($payload);
+        } catch (ExceptionInterface $exception) {
+            throw new JsonException($exception->getMessage(), 0, $exception);
+        }
+
         /** @var null|array<string, mixed> $customerPayload */
-        $customerPayload = isset($payload['customer']) && is_array($payload['customer'])
-            ? $payload['customer']
-            : null;
+        $customerPayload = $data['customer'];
 
         return new CheckoutResponse(
-            $id,
-            (float) $amount,
-            $description,
-            OrderId::fromString($orderId),
-            $status,
-            $checkoutLink,
-            new DateTimeImmutable($creationDate),
-            new DateTimeImmutable($expirationDate),
+            $data['id'],
+            $data['amount'],
+            $data['description'],
+            OrderId::fromString($data['order_id']),
+            $data['status'],
+            $data['checkout_link'],
+            new DateTimeImmutable($data['creation_date']),
+            new DateTimeImmutable($data['expiration_date']),
             $this->customerFactory->fromArray($customerPayload)
         );
     }
@@ -56,34 +53,67 @@ final class CheckoutResponseFactory
     /**
      * @param array<string,mixed> $payload
      *
-     * @throws JsonException
+     * @return array{
+     *   id: string,
+     *   amount: float,
+     *   status: string,
+     *   checkout_link: string,
+     *   creation_date: string,
+     *   expiration_date: string,
+     *   order_id: string,
+     *   description: string,
+     *   customer: null|array<string,mixed>
+     * }
      */
-    private function expectString(array $payload, string $key): string
+    private function resolvePayload(array $payload): array
     {
-        if (!isset($payload[$key]) || !is_string($payload[$key])) {
-            throw new JsonException(sprintf("Expected key '%s' to be a string.", $key));
+        $resolver = new OptionsResolver();
+        $resolver->setRequired([
+            'id',
+            'amount',
+            'status',
+            'checkout_link',
+            'creation_date',
+            'expiration_date',
+            'order_id',
+        ]);
+
+        $resolver->setDefaults([
+            'description' => '',
+            'customer' => null,
+        ]);
+
+        foreach (['id', 'status', 'checkout_link', 'creation_date', 'expiration_date', 'order_id'] as $key) {
+            $resolver->setAllowedTypes($key, 'string');
         }
 
-        return $payload[$key];
-    }
+        $resolver->setAllowedTypes('description', ['null', 'string']);
+        $resolver->setNormalizer('description', function (Options $options, mixed $value): string {
+            return $value ?? '';
+        });
 
-    /**
-     * @param array<string,mixed> $payload
-     *
-     * @throws JsonException
-     */
-    private function expectNumeric(array $payload, string $key): float
-    {
-        if (!array_key_exists($key, $payload)) {
-            throw new JsonException(sprintf("Expected key '%s' to be numeric.", $key));
-        }
+        $resolver->setAllowedTypes('customer', ['null', 'array']);
+        $resolver->setAllowedTypes('amount', ['int', 'float', 'string']);
+        $resolver->setAllowedValues('amount', function (mixed $value): bool {
+            return is_numeric($value);
+        });
 
-        $value = $payload[$key];
+        $resolver->setNormalizer('amount', function (Options $options, mixed $value): float {
+            return (float) $value;
+        });
 
-        if (!is_numeric($value)) {
-            throw new JsonException(sprintf("Expected key '%s' to be numeric.", $key));
-        }
+        $resolved = $resolver->resolve($payload);
 
-        return (float) $value;
+        return [
+            'id' => $resolved['id'],
+            'amount' => $resolved['amount'],
+            'status' => $resolved['status'],
+            'checkout_link' => $resolved['checkout_link'],
+            'creation_date' => $resolved['creation_date'],
+            'expiration_date' => $resolved['expiration_date'],
+            'order_id' => $resolved['order_id'],
+            'description' => $resolved['description'],
+            'customer' => $resolved['customer'],
+        ];
     }
 }
