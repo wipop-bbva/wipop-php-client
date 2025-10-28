@@ -13,6 +13,7 @@ use Wipop\Checkout\Payload\CheckoutPayload;
 use Wipop\Checkout\Response\CheckoutResponseFactory;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Exception\WipopApiException;
+use Wipop\Client\Exception\WipopApiExceptionFactory;
 use Wipop\Utils\ChargeStatus;
 
 final class CheckoutService
@@ -68,7 +69,7 @@ final class CheckoutService
         if (($data['status'] ?? null) !== ChargeStatus::AVAILABLE) {
             $this->logger->warning('Checkout API error', ['response' => $data]);
 
-            throw WipopApiException::fromPayload($data);
+            throw WipopApiExceptionFactory::fromPayload($data);
         }
     }
 
