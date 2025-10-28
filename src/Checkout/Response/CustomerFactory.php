@@ -9,6 +9,8 @@ use DateTimeInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Wipop\Customer\Customer;
+use Wipop\Customer\CustomerInterface;
+use Wipop\Customer\NullCustomer;
 
 final class CustomerFactory
 {
@@ -22,14 +24,10 @@ final class CustomerFactory
     /**
      * @param null|array<string,mixed> $payload
      */
-    public function fromArray(?array $payload): Customer
+    public function fromArray(?array $payload): CustomerInterface
     {
         if ($payload === null) {
-            return new Customer(
-                '',
-                '',
-                '',
-            );
+            return new NullCustomer();
         }
 
         $data = $this->resolvePayload($payload);
