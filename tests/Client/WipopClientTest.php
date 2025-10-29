@@ -42,11 +42,11 @@ class WipopClientTest extends TestCase
         $this->assertInstanceOf(UriInterface::class, $config['base_uri']);
         $this->assertSame('https://sand-api.wipop.es', (string) $config['base_uri']);
         $this->assertArrayHasKey('timeout', $config);
-        $this->assertIsFloat($config['timeout']);
-        $this->assertSame(30.0, $config['timeout']);
+        $this->assertIsInt($config['timeout']);
+        $this->assertSame(30, $config['timeout']);
         $this->assertArrayHasKey('connect_timeout', $config);
-        $this->assertIsFloat($config['connect_timeout']);
-        $this->assertSame(5.0, $config['connect_timeout']);
+        $this->assertIsInt($config['connect_timeout']);
+        $this->assertSame(5, $config['connect_timeout']);
 
         $this->assertArrayHasKey('headers', $config);
         $this->assertIsArray($config['headers']);
