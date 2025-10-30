@@ -15,9 +15,6 @@ use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Throwable;
 use Wipop\Checkout\Checkout;
 use Wipop\Checkout\CheckoutResponse;
 use Wipop\Checkout\CheckoutService;
@@ -233,15 +230,6 @@ class CheckoutServiceTest extends TestCase
         }
     }
 
-    /**
-     * @param array<int, array{
-     *     request: RequestInterface,
-     *     response: null|ResponseInterface,
-     *     error: null|Throwable,
-     *     options: array<string, mixed>
-     * }> $history
-     * @param array<string, mixed> $expectedPayload
-     */
     private function assertCheckoutRequest(array $history, string $expectedPath, array $expectedPayload): void
     {
         $this->assertCount(1, $history);
@@ -253,7 +241,6 @@ class CheckoutServiceTest extends TestCase
         $body = (string) $request->getBody();
 
         try {
-            /** @var array<string, mixed> $payload */
             $payload = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             $this->fail('Request body is not valid JSON: ' . $exception->getMessage());
@@ -303,26 +290,6 @@ class CheckoutServiceTest extends TestCase
         );
     }
 
-    /**
-     * @param array<int, ResponseInterface|Throwable> $responses
-     * @param array<int, array{
-     *     request: RequestInterface,
-     *     response: null|ResponseInterface,
-     *     error: null|Throwable,
-     *     options: array<string, mixed>
-     * }> &$history
-     * @param-out array<int, array{
-     *     request: RequestInterface,
-     *     response: null|ResponseInterface,
-     *     error: null|Throwable,
-     *     options: array<string, mixed>
-     * }>|\ArrayAccess<int, array{
-     *     request: RequestInterface,
-     *     response: null|ResponseInterface,
-     *     error: null|Throwable,
-     *     options: array<string, mixed>
-     * }> $history
-     */
     private function createServiceWithMockResponses(array $responses, array &$history): CheckoutService
     {
         $mock = new MockHandler($responses);

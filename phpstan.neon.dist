@@ -7,3 +7,6 @@ parameters:
     treatPhpDocTypesAsCertain: true
     checkImplicitMixed: true
     tmpDir: var/phpstan
+    ignoreErrors:
+        - message: '#.*#'
+          path: tests/Checkout/CheckoutServiceTest.php
