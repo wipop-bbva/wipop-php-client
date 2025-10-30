@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Wipop\Checkout;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Wipop\Checkout\Payload\CheckoutPayload;
 use Wipop\Checkout\Response\CheckoutResponseFactory;
 use Wipop\Client\ClientConfiguration;
+use Wipop\Client\Exception\HttpTransportException;
 use Wipop\Client\Exception\WipopApiException;
 use Wipop\Client\Exception\WipopApiExceptionFactory;
+use Wipop\Client\Http\HttpClientInterface;
 use Wipop\Utils\ChargeStatus;
 
 final class CheckoutService
@@ -22,7 +22,7 @@ final class CheckoutService
     private readonly CheckoutResponseFactory $checkoutResponseFactory;
 
     public function __construct(
-        private readonly ClientInterface $httpClient,
+        private readonly HttpClientInterface $httpClient,
         private readonly ClientConfiguration $configuration,
         ?LoggerInterface $logger = null,
         ?CheckoutResponseFactory $checkoutResponseFactory = null
@@ -31,9 +31,6 @@ final class CheckoutService
         $this->checkoutResponseFactory = $checkoutResponseFactory ?? new CheckoutResponseFactory();
     }
 
-    /**
-     * @todo Implement API call returning CheckoutResponse
-     */
     public function pay(Checkout $checkout): CheckoutResponse
     {
         try {
@@ -41,7 +38,7 @@ final class CheckoutService
             $response = $this->httpClient->request('POST', $path, [
                 'json' => CheckoutPayload::fromCheckout($checkout),
             ]);
-        } catch (GuzzleException $exception) {
+        } catch (HttpTransportException $exception) {
             $this->logger->error('Error calling checkout endpoint: ' . $exception->getMessage());
 
             throw new WipopApiException('HTTP error on checkout request', null, $exception);

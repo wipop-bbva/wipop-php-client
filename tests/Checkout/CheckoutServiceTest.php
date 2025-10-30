@@ -15,6 +15,9 @@ use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Throwable;
 use Wipop\Checkout\Checkout;
 use Wipop\Checkout\CheckoutResponse;
 use Wipop\Checkout\CheckoutService;
@@ -23,6 +26,7 @@ use Wipop\Client\Environment;
 use Wipop\Client\Exception\ApiErrorCode;
 use Wipop\Client\Exception\WipopApiBusinessException;
 use Wipop\Client\Exception\WipopApiException;
+use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Customer\Customer;
 use Wipop\Customer\NullCustomer;
 use Wipop\Utils\ChargeStatus;
@@ -309,7 +313,7 @@ class CheckoutServiceTest extends TestCase
             'sk_test_secret'
         );
 
-        return new CheckoutService($client, $configuration);
+        return new CheckoutService(new GuzzleHttpClient($client), $configuration);
     }
 
     private function assertCheckoutResponse(CheckoutResponse $response, bool $expectsCustomer = true): void

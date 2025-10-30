@@ -14,6 +14,7 @@ use Wipop\CardPayment\CardPaymentService;
 use Wipop\Checkout\Checkout;
 use Wipop\Checkout\CheckoutResponse;
 use Wipop\Checkout\CheckoutService;
+use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\RecurrentPayment\RecurrentPayment;
 use Wipop\RecurrentPayment\RecurrentPaymentResponse;
 use Wipop\RecurrentPayment\RecurrentPaymentService;
@@ -52,7 +53,11 @@ final class WipopClient
             ],
         ]);
         $this->cardPaymentService = new CardPaymentService();
-        $this->checkoutService = new CheckoutService($this->httpClient, $this->configuration, $this->logger);
+        $this->checkoutService = new CheckoutService(
+            new GuzzleHttpClient($this->httpClient),
+            $this->configuration,
+            $this->logger
+        );
         $this->recurrentPaymentService = new RecurrentPaymentService();
     }
 
