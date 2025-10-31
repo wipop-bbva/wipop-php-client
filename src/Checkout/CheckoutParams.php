@@ -103,6 +103,8 @@ final class CheckoutParams extends RequestBuilder
             throw new InvalidArgumentException('Checkout terminal is required.');
         }
 
+        $customer = $parameters['customer'] ?? null;
+
         $payload = [
             'amount' => (float) $parameters['amount'],
             'currency' => $parameters['currency'] ?? Currency::EUR,
@@ -111,7 +113,7 @@ final class CheckoutParams extends RequestBuilder
             'send_email' => $parameters['send_email'] ?? false,
             'terminal' => TerminalPayload::fromTerminal($parameters['terminal']),
             'language' => $parameters['language'] ?? Language::SPANISH,
-            'customer' => CustomerPayload::fromCustomer($parameters['customer']),
+            'customer' => CustomerPayload::fromCustomer($customer instanceof Customer ? $customer : null),
         ];
 
         if (isset($parameters['order_id'])) {
@@ -142,6 +144,10 @@ final class CheckoutParams extends RequestBuilder
     public function getCustomer(): ?Customer
     {
         $parameters = $this->parameters();
+        if (!isset($parameters['customer'])) {
+            return null;
+        }
+
         $customer = $parameters['customer'];
 
         return $customer instanceof Customer ? $customer : null;
