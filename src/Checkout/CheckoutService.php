@@ -4,55 +4,38 @@ declare(strict_types=1);
 
 namespace Wipop\Checkout;
 
-use JsonException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Wipop\Checkout\Payload\CheckoutPayload;
 use Wipop\Checkout\Response\CheckoutResponseFactory;
 use Wipop\Client\ClientConfiguration;
-use Wipop\Client\Exception\HttpTransportException;
-use Wipop\Client\Exception\WipopApiException;
 use Wipop\Client\Exception\WipopApiExceptionFactory;
 use Wipop\Client\Http\HttpClientInterface;
+use Wipop\Client\Operation\AbstractOperation;
 use Wipop\Utils\ChargeStatus;
 
-final class CheckoutService
+final class CheckoutService extends AbstractOperation
 {
-    private readonly LoggerInterface $logger;
     private readonly CheckoutResponseFactory $checkoutResponseFactory;
 
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
-        private readonly ClientConfiguration $configuration,
+        HttpClientInterface $httpClient,
+        ClientConfiguration $configuration,
         ?LoggerInterface $logger = null,
-        ?CheckoutResponseFactory $checkoutResponseFactory = null
     ) {
-        $this->logger = $logger ?? new NullLogger();
-        $this->checkoutResponseFactory = $checkoutResponseFactory ?? new CheckoutResponseFactory();
+        parent::__construct($httpClient, $configuration, $logger ?? new NullLogger());
+        $this->checkoutResponseFactory = new CheckoutResponseFactory();
     }
 
-    public function pay(Checkout $checkout): CheckoutResponse
+    // TODO rethink types
+    public function pay(Checkout|CheckoutParams $checkout): CheckoutResponse
     {
-        try {
-            $path = $this->getEndpointPath($checkout);
-            $response = $this->httpClient->request('POST', $path, [
-                'json' => CheckoutPayload::fromCheckout($checkout),
-            ]);
-        } catch (HttpTransportException $exception) {
-            $this->logger->error('Error calling checkout endpoint: ' . $exception->getMessage());
+        $params = $checkout instanceof CheckoutParams ? $checkout : CheckoutParams::fromCheckout($checkout);
 
-            throw new WipopApiException('HTTP error on checkout request', null, $exception);
-        }
+        $data = $this->post(
+            $this->getEndpointPath($params),
+            $params->toArray()
+        );
 
-        try {
-            $body = $response->getBody()->getContents();
-            /** @var array<string, mixed> $data */
-            $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            $this->logger->error('Error decoding JSON response: ' . $exception->getMessage());
-
-            throw new WipopApiException('Error decoding JSON response', null, $exception);
-        }
         $this->assertSuccess($data);
 
         return $this->checkoutResponseFactory->fromArray($data);
@@ -64,15 +47,15 @@ final class CheckoutService
     private function assertSuccess(array $data): void
     {
         if (($data['status'] ?? null) !== ChargeStatus::AVAILABLE) {
-            $this->logger->warning('Checkout API error', ['response' => $data]);
+            $this->getLogger()->warning('Checkout API error', ['response' => $data]);
 
             throw WipopApiExceptionFactory::fromPayload($data);
         }
     }
 
-    private function getEndpointPath(Checkout $checkout): string
+    private function getEndpointPath(CheckoutParams $checkout): string
     {
-        $merchantId = $this->configuration->getMerchantId();
+        $merchantId = $this->getConfiguration()->getMerchantId();
 
         if ($checkout->getCustomer()?->getPublicId() !== null) {
             return sprintf('/k/v1/%s/customers/%s/checkouts', $merchantId, $checkout->getCustomer()->getPublicId());

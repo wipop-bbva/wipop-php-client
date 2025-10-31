@@ -12,6 +12,7 @@ use Wipop\CardPayment\CardPayment;
 use Wipop\CardPayment\CardPaymentResponse;
 use Wipop\CardPayment\CardPaymentService;
 use Wipop\Checkout\Checkout;
+use Wipop\Checkout\CheckoutParams;
 use Wipop\Checkout\CheckoutResponse;
 use Wipop\Checkout\CheckoutService;
 use Wipop\Client\Http\GuzzleHttpClient;
@@ -43,12 +44,7 @@ final class WipopClient
                 'Content-Type' => 'application/json',
                 'Authorization' => sprintf(
                     'Basic %s',
-                    base64_encode(
-                        sprintf(
-                            '%s',
-                            $this->configuration->getSecretKey()
-                        )
-                    )
+                    base64_encode($this->configuration->getSecretKey() . ':')
                 ),
             ],
         ]);
@@ -66,7 +62,7 @@ final class WipopClient
         return $this->configuration;
     }
 
-    public function checkoutPayment(Checkout $checkout): CheckoutResponse
+    public function checkoutPayment(Checkout|CheckoutParams $checkout): CheckoutResponse
     {
         return $this->checkoutService->pay($checkout);
     }

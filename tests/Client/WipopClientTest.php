@@ -55,7 +55,7 @@ class WipopClientTest extends TestCase
         $this->assertArrayHasKey('Content-Type', $headers);
         $this->assertArrayHasKey('Authorization', $headers);
         $this->assertSame('application/json', $headers['Content-Type']);
-        $this->assertSame('Basic ' . base64_encode('sk_test_secret'), $headers['Authorization']);
+        $this->assertSame('Basic ' . base64_encode('sk_test_secret:'), $headers['Authorization']);
 
         $this->assertSame($configuration, $client->getConfiguration());
     }

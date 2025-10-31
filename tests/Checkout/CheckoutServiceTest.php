@@ -19,8 +19,10 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 use Wipop\Checkout\Checkout;
+use Wipop\Checkout\CheckoutParams;
 use Wipop\Checkout\CheckoutResponse;
 use Wipop\Checkout\CheckoutService;
+use Wipop\Checkout\Origin;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\Exception\ApiErrorCode;
@@ -30,6 +32,8 @@ use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Customer\Customer;
 use Wipop\Customer\NullCustomer;
 use Wipop\Utils\ChargeStatus;
+use Wipop\Utils\Currency;
+use Wipop\Utils\Language;
 use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
@@ -137,6 +141,10 @@ class CheckoutServiceTest extends TestCase
             '/k/v1/' . self::MERCHANT_ID . '/customers/ext999/checkouts',
             [
                 'amount' => 150.0,
+                'currency' => Currency::EUR,
+                'origin' => Origin::API,
+                'send_email' => false,
+                'language' => Language::SPANISH,
                 'product_type' => ProductType::PAYMENT_GATEWAY,
                 'terminal' => ['id' => 1],
                 'customer' => [
@@ -171,7 +179,7 @@ class CheckoutServiceTest extends TestCase
         );
 
         $this->expectException(WipopApiException::class);
-        $this->expectExceptionMessage('HTTP error on checkout request');
+        $this->expectExceptionMessage('Error calling POST');
 
         try {
             $service->pay($checkout);
@@ -208,6 +216,40 @@ class CheckoutServiceTest extends TestCase
         } finally {
             $this->assertCount(1, $history);
         }
+    }
+
+    #[Test]
+    public function itSupportsCheckoutParamsWithAllOptions(): void
+    {
+        $history = [];
+        $service = $this->createServiceWithMockResponses([$this->successResponse()], $history);
+
+        $params = (new CheckoutParams())
+            ->setAmount(200.0)
+            ->setCurrency(Currency::EUR)
+            ->setProductType(ProductType::PAYMENT_GATEWAY)
+            ->setOrigin(Origin::API)
+            ->setTerminal(new Terminal(1))
+            ->setSendEmail(true)
+            ->setCapture(true)
+        ;
+
+        $service->pay($params);
+
+        $this->assertCheckoutRequest(
+            $history,
+            '/k/v1/' . self::MERCHANT_ID . '/checkouts',
+            [
+                'amount' => 200.0,
+                'currency' => Currency::EUR,
+                'origin' => Origin::API,
+                'product_type' => ProductType::PAYMENT_GATEWAY,
+                'terminal' => ['id' => 1],
+                'send_email' => true,
+                'capture' => true,
+                'language' => Language::SPANISH,
+            ]
+        );
     }
 
     #[Test]
