@@ -11,6 +11,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
 use ReflectionObject;
 use ReflectionProperty;
+use Wipop\Charge\ChargeOperation;
+use Wipop\Checkout\CheckoutOperation;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
@@ -58,6 +60,8 @@ class WipopClientTest extends TestCase
         $this->assertSame('Basic ' . base64_encode('sk_test_secret:'), $headers['Authorization']);
 
         $this->assertSame($configuration, $client->getConfiguration());
+        $this->assertInstanceOf(CheckoutOperation::class, $client->checkoutOperation());
+        $this->assertInstanceOf(ChargeOperation::class, $client->chargeOperation());
     }
 
     private function extractHttpClient(WipopClient $client): ClientInterface

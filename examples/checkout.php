@@ -58,7 +58,7 @@ $checkout = (new CheckoutParams())
     ->setSendEmail(true);
 
 try {
-    $response = $client->checkoutPayment($checkout);
+    $response = $client->checkoutOperation()->create($checkout);
 } catch (Throwable $exception) {
     $logger->error('Checkout example failed', ['exception' => $exception]);
     fwrite(STDERR, sprintf("Checkout failed: %s\n", $exception->getMessage()));

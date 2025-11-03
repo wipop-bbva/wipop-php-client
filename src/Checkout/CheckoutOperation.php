@@ -13,7 +13,7 @@ use Wipop\Client\Http\HttpClientInterface;
 use Wipop\Client\Operation\AbstractOperation;
 use Wipop\Utils\ChargeStatus;
 
-final class CheckoutService extends AbstractOperation
+final class CheckoutOperation extends AbstractOperation
 {
     private readonly CheckoutResponseFactory $checkoutResponseFactory;
 
@@ -26,8 +26,10 @@ final class CheckoutService extends AbstractOperation
         $this->checkoutResponseFactory = new CheckoutResponseFactory();
     }
 
-    // TODO rethink types
-    public function pay(Checkout|CheckoutParams $checkout): CheckoutResponse
+    /**
+     * Creates a checkout using either the domain object or its params representation.
+     */
+    public function create(Checkout|CheckoutParams $checkout): CheckoutResponse
     {
         $params = $checkout instanceof CheckoutParams ? $checkout : CheckoutParams::fromCheckout($checkout);
 
