@@ -3,18 +3,20 @@
 declare(strict_types=1);
 
 use Dotenv\Dotenv;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Wipop\Checkout\CheckoutParams;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
 use Wipop\Customer\Customer;
+use Wipop\Examples\ExampleUtils;
 use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/utils.php';
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
@@ -51,7 +53,7 @@ $checkout = (new CheckoutParams())
     ->setAmount(49.95)
     ->setProductType(ProductType::PAYMENT_LINK)
     ->setTerminal(new Terminal(0))
-    ->setOrderId(OrderId::fromString('8887c5RfrfKD'))
+    ->setOrderId(OrderId::fromString(ExampleUtils::randomOrderId()))
     ->setCustomer($customer)
     ->setRedirectUrl('https://miweb.com/callback')
     ->setDescription('Prueba integrador externo QA')
