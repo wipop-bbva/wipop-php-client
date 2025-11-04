@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Wipop\Client;
 
-use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Wipop\CardPayment\CardPayment;
@@ -15,6 +13,7 @@ use Wipop\Checkout\Checkout;
 use Wipop\Checkout\CheckoutResponse;
 use Wipop\Checkout\CheckoutService;
 use Wipop\Client\Http\GuzzleHttpClient;
+use Wipop\Client\Http\HttpClientInterface;
 use Wipop\RecurrentPayment\RecurrentPayment;
 use Wipop\RecurrentPayment\RecurrentPaymentResponse;
 use Wipop\RecurrentPayment\RecurrentPaymentService;
@@ -25,36 +24,20 @@ final class WipopClient
     private readonly CheckoutService $checkoutService;
     private readonly RecurrentPaymentService $recurrentPaymentService;
     private readonly ClientConfiguration $configuration;
-    private readonly ClientInterface $httpClient;
+    private readonly HttpClientInterface $httpClient;
     private readonly LoggerInterface $logger;
 
     public function __construct(
         ClientConfiguration $configuration,
         ?LoggerInterface $logger = null,
-        ?ClientInterface $httpClient = null,
+        ?HttpClientInterface $httpClient = null,
     ) {
         $this->configuration = $configuration;
         $this->logger = $logger ?? new NullLogger();
-        $this->httpClient = $httpClient ?? new HttpClient([
-            'base_uri' => $this->configuration->getApiUrl(),
-            'timeout' => $this->configuration->getHttpConfiguration()->getResponseTimeout() / 1000,
-            'connect_timeout' => $this->configuration->getHttpConfiguration()->getConnectionRequestTimeout() / 1000,
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Authorization' => sprintf(
-                    'Basic %s',
-                    base64_encode(
-                        sprintf(
-                            '%s',
-                            $this->configuration->getSecretKey()
-                        )
-                    )
-                ),
-            ],
-        ]);
+        $this->httpClient = $httpClient ?? new GuzzleHttpClient($this->configuration);
         $this->cardPaymentService = new CardPaymentService();
         $this->checkoutService = new CheckoutService(
-            new GuzzleHttpClient($this->httpClient),
+            $this->httpClient,
             $this->configuration,
             $this->logger
         );
