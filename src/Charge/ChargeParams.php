@@ -15,6 +15,7 @@ use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
+use function array_key_exists;
 use function sprintf;
 
 /**
@@ -77,6 +78,11 @@ final class ChargeParams extends RequestBuilder
         return $this->with('customer', $customer);
     }
 
+    public function setCapture(bool $capture): self
+    {
+        return $this->with('capture', $capture);
+    }
+
     public function setLanguage(string $language): self
     {
         return $this->with('language', $language);
@@ -108,7 +114,7 @@ final class ChargeParams extends RequestBuilder
 
         $orderId = $parameters['order_id'] ?? null;
 
-        return [
+        $payload = [
             'amount' => (float) $parameters['amount'],
             'method' => $this->normalizeMethod($parameters['method'] ?? null),
             'description' => $parameters['description'] ?? '',
@@ -122,6 +128,12 @@ final class ChargeParams extends RequestBuilder
             'customer' => CustomerPayload::fromCustomer($customer instanceof Customer ? $customer : null),
             'language' => $parameters['language'] ?? Language::SPANISH,
         ];
+
+        $payload['capture'] = array_key_exists('capture', $parameters)
+            ? (bool) $parameters['capture']
+            : true;
+
+        return $payload;
     }
 
     public function getCustomer(): ?Customer

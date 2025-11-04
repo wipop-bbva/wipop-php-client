@@ -62,6 +62,7 @@ class ChargeParamsTest extends TestCase
                     'external_id' => '',
                 ],
                 'language' => Language::SPANISH,
+                'capture' => true,
             ],
             $payload
         );
@@ -85,16 +86,18 @@ class ChargeParamsTest extends TestCase
             ->setTerminal(new Terminal(2))
             ->setCustomer($customer)
             ->setSendEmail(true)
-            ->setLanguage('es-ES')
+            ->setLanguage('es')
             ->setOriginChannel(OriginChannel::PAYMENT_LINK)
             ->setProductType(ProductType::PAYMENT_GATEWAY)
+            ->setCapture(true)
         ;
 
         $payload = $params->toArray();
 
         $this->assertTrue($payload['send_email']);
-        $this->assertSame('es-ES', $payload['language']);
+        $this->assertSame('es', $payload['language']);
         $this->assertSame(ChargeMethod::CARD, $payload['method']);
+        $this->assertTrue($payload['capture']);
         $this->assertSame(
             [
                 'name' => 'Ana',
