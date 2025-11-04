@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Wipop\Charge;
 
 use InvalidArgumentException;
+use Wipop\CardPayment\Card;
+use Wipop\Charge\Payload\CardPayload;
 use Wipop\Checkout\Payload\CustomerPayload;
 use Wipop\Checkout\Payload\TerminalPayload;
 use Wipop\Client\Request\RequestBuilder;
@@ -16,6 +18,7 @@ use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
 use function array_key_exists;
+use function is_array;
 use function sprintf;
 
 /**
@@ -88,6 +91,44 @@ final class ChargeParams extends RequestBuilder
         return $this->with('language', $language);
     }
 
+    public function setCard(Card $card, ?string $cvv2 = null, ?string $holderName = null): self
+    {
+        $payload = CardPayload::fromCard($card);
+
+        if ($cvv2 !== null) {
+            $payload['cvv2'] = $cvv2;
+        }
+
+        if ($holderName !== null) {
+            $payload['holder_name'] = $holderName;
+        }
+
+        return $this->with('card', $payload);
+    }
+
+    /**
+     * @param array<string, string> $cardPayload
+     */
+    public function setCardPayload(array $cardPayload): self
+    {
+        return $this->with('card', $cardPayload);
+    }
+
+    public function setSourceId(string $sourceId): self
+    {
+        return $this->with('source_id', $sourceId);
+    }
+
+    public function setUseCof(bool $useCof): self
+    {
+        return $this->with('use_cof', $useCof);
+    }
+
+    public function setPostType(PostType $postType): self
+    {
+        return $this->with('post_type', $postType);
+    }
+
     /**
      * Builds the payload as an array ready to jsonify.
      *
@@ -132,6 +173,32 @@ final class ChargeParams extends RequestBuilder
         $payload['capture'] = array_key_exists('capture', $parameters)
             ? (bool) $parameters['capture']
             : true;
+
+        if (isset($parameters['source_id'])) {
+            $payload['source_id'] = (string) $parameters['source_id'];
+        }
+
+        if (array_key_exists('use_cof', $parameters)) {
+            $payload['use_cof'] = (bool) $parameters['use_cof'];
+        }
+
+        if (isset($parameters['post_type'])) {
+            $postType = $parameters['post_type'];
+            if (!$postType instanceof PostType) {
+                throw new InvalidArgumentException('Post type must be an instance of PostType.');
+            }
+
+            $payload['post_type'] = $postType->toArray();
+        }
+
+        if (array_key_exists('card', $parameters)) {
+            $cardPayload = $parameters['card'];
+            if (!is_array($cardPayload)) {
+                throw new InvalidArgumentException('Card payload must be an array.');
+            }
+
+            $payload['card'] = $cardPayload;
+        }
 
         return $payload;
     }

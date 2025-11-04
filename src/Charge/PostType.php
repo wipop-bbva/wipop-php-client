@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Wipop\Charge;
+
+final class PostType
+{
+    public function __construct(private readonly PostTypeMode $mode)
+    {
+    }
+
+    public function getMode(): PostTypeMode
+    {
+        return $this->mode;
+    }
+
+    /**
+     * @return array{mode: PostTypeMode}
+     */
+    public function toArray(): array
+    {
+        return ['mode' => $this->mode];
+    }
+}

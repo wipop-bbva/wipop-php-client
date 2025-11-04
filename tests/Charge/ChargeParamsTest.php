@@ -10,6 +10,8 @@ use PHPUnit\Framework\TestCase;
 use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
+use Wipop\Charge\PostType;
+use Wipop\Charge\PostTypeMode;
 use Wipop\Customer\Customer;
 use Wipop\Utils\Currency;
 use Wipop\Utils\Language;
@@ -72,9 +74,9 @@ class ChargeParamsTest extends TestCase
     public function itIncludesCustomerDetailsWhenProvided(): void
     {
         $customer = new Customer(
-            name: 'Ana',
-            lastName: 'García',
-            email: 'ana.garcia@example.com',
+            name: 'Carlos',
+            lastName: 'López',
+            email: 'carlos.lopez@example.com',
             publicId: 'ext999',
             externalId: '123456',
             phoneNumber: '+34611111111'
@@ -100,13 +102,91 @@ class ChargeParamsTest extends TestCase
         $this->assertTrue($payload['capture']);
         $this->assertSame(
             [
-                'name' => 'Ana',
-                'last_name' => 'García',
-                'email' => 'ana.garcia@example.com',
+                'name' => 'Carlos',
+                'last_name' => 'López',
+                'email' => 'carlos.lopez@example.com',
                 'external_id' => '123456',
                 'phone_number' => '+34611111111',
             ],
             $payload['customer']
         );
+    }
+
+    #[Test]
+    public function itBuildsGatewayPayloadWithCardData(): void
+    {
+        $params = (new ChargeParams())
+            ->setAmount(100.0)
+            ->setMethod(ChargeMethod::CARD)
+            ->setProductType(ProductType::PAYMENT_GATEWAY)
+            ->setOriginChannel(OriginChannel::API)
+            ->setTerminal(new Terminal(1))
+            ->setCurrency(Currency::EUR)
+            ->setDescription('Direct gateway charge')
+            ->setCardPayload([
+                'card_number' => '4111111111111111',
+                'holder_name' => 'John Doe',
+                'expiration_year' => '27',
+                'expiration_month' => '12',
+                'cvv2' => '123',
+            ])
+        ;
+
+        $payload = $params->toArray();
+
+        $this->assertSame(ProductType::PAYMENT_GATEWAY, $payload['product_type']);
+        $this->assertSame('Direct gateway charge', $payload['description']);
+        $this->assertSame([
+            'card_number' => '4111111111111111',
+            'holder_name' => 'John Doe',
+            'expiration_year' => '27',
+            'expiration_month' => '12',
+            'cvv2' => '123',
+        ], $payload['card']);
+        $this->assertTrue($payload['capture']);
+    }
+
+    #[Test]
+    public function itBuildsTokenizationPayload(): void
+    {
+        $params = (new ChargeParams())
+            ->setAmount(0.0)
+            ->setMethod(ChargeMethod::CARD)
+            ->setProductType(ProductType::PAYMENT_LINK)
+            ->setOriginChannel(OriginChannel::API)
+            ->setTerminal(new Terminal(1))
+            ->setUseCof(true)
+            ->setDescription('Tokenize card via hosted form')
+        ;
+
+        $payload = $params->toArray();
+
+        $this->assertSame(0.0, $payload['amount']);
+        $this->assertTrue($payload['use_cof']);
+        $this->assertTrue($payload['capture']);
+    }
+
+    #[Test]
+    public function itBuildsGatewayPayloadWithToken(): void
+    {
+        $params = (new ChargeParams())
+            ->setAmount(35.0)
+            ->setMethod(ChargeMethod::CARD)
+            ->setProductType(ProductType::PAYMENT_GATEWAY)
+            ->setOriginChannel(OriginChannel::API)
+            ->setTerminal(new Terminal(1))
+            ->setSourceId('card_tok_12345')
+            ->setUseCof(true)
+            ->setPostType(new PostType(PostTypeMode::RECURRENT))
+            ->setCapture(false)
+            ->setDescription('MIT recurring charge')
+        ;
+
+        $payload = $params->toArray();
+
+        $this->assertSame('card_tok_12345', $payload['source_id']);
+        $this->assertTrue($payload['use_cof']);
+        $this->assertSame(['mode' => PostTypeMode::RECURRENT->value], $payload['post_type']);
+        $this->assertFalse($payload['capture']);
     }
 }
