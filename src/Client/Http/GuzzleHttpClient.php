@@ -4,17 +4,41 @@ declare(strict_types=1);
 
 namespace Wipop\Client\Http;
 
+use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
+use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Exception\HttpTransportException;
 
+use function array_merge;
+use function base64_encode;
+use function is_array;
 use function sprintf;
 
 final class GuzzleHttpClient implements HttpClientInterface
 {
-    public function __construct(private readonly ClientInterface $client)
+    private readonly ClientInterface $client;
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function __construct(ClientConfiguration $configuration, array $options = [])
     {
+        $defaultOptions = [
+            'base_uri' => $configuration->getApiUrl(),
+            'timeout' => $configuration->getHttpConfiguration()->getResponseTimeout() / 1000,
+            'connect_timeout' => $configuration->getHttpConfiguration()->getConnectionRequestTimeout() / 1000,
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => sprintf(
+                    'Basic %s',
+                    base64_encode($configuration->getSecretKey())
+                ),
+            ],
+        ];
+
+        $this->client = new Client($this->mergeOptions($defaultOptions, $options));
     }
 
     /**
@@ -31,5 +55,27 @@ final class GuzzleHttpClient implements HttpClientInterface
                 $exception
             );
         }
+    }
+
+    /**
+     * @param array<string, mixed> $defaults
+     * @param array<string, mixed> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private function mergeOptions(array $defaults, array $overrides): array
+    {
+        $merged = $defaults;
+
+        foreach ($overrides as $key => $value) {
+            if ($key === 'headers' && isset($merged['headers']) && is_array($value)) {
+                $merged['headers'] = array_merge($merged['headers'], $value);
+                continue;
+            }
+
+            $merged[$key] = $value;
+        }
+
+        return $merged;
     }
 }

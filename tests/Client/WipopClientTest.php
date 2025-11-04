@@ -15,6 +15,7 @@ use Wipop\Charge\ChargeOperation;
 use Wipop\Checkout\CheckoutOperation;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
+use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Client\WipopClient;
 
 use function is_array;
@@ -37,8 +38,10 @@ class WipopClientTest extends TestCase
         $client = new WipopClient($configuration);
         $httpClient = $this->extractHttpClient($client);
 
-        $this->assertInstanceOf(ClientInterface::class, $httpClient);
-        $config = $this->extractHttpClientConfig($httpClient);
+        $this->assertInstanceOf(GuzzleHttpClient::class, $httpClient);
+        $guzzleClient = $this->extractGuzzleClient($httpClient);
+        $this->assertInstanceOf(ClientInterface::class, $guzzleClient);
+        $config = $this->extractHttpClientConfig($guzzleClient);
 
         $this->assertArrayHasKey('base_uri', $config);
         $this->assertInstanceOf(UriInterface::class, $config['base_uri']);
@@ -64,12 +67,32 @@ class WipopClientTest extends TestCase
         $this->assertInstanceOf(ChargeOperation::class, $client->chargeOperation());
     }
 
-    private function extractHttpClient(WipopClient $client): ClientInterface
+    private function extractHttpClient(WipopClient $client): GuzzleHttpClient
     {
         $reflection = new ReflectionProperty($client, 'httpClient');
         $reflection->setAccessible(true);
 
-        return $reflection->getValue($client);
+        $httpClient = $reflection->getValue($client);
+
+        if (!$httpClient instanceof GuzzleHttpClient) {
+            $this->fail('Unexpected HTTP client implementation.');
+        }
+
+        return $httpClient;
+    }
+
+    private function extractGuzzleClient(GuzzleHttpClient $client): ClientInterface
+    {
+        $reflection = new ReflectionProperty($client, 'client');
+        $reflection->setAccessible(true);
+
+        $guzzleClient = $reflection->getValue($client);
+
+        if (!$guzzleClient instanceof ClientInterface) {
+            $this->fail('Unable to access the underlying Guzzle client.');
+        }
+
+        return $guzzleClient;
     }
 
     /**
