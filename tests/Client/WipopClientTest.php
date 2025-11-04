@@ -11,7 +11,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
 use ReflectionObject;
 use ReflectionProperty;
-use Wipop\Charge\ChargeOperation;
 use Wipop\Checkout\CheckoutOperation;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
@@ -32,7 +31,7 @@ class WipopClientTest extends TestCase
         $configuration = new ClientConfiguration(
             Environment::SANDBOX,
             'm1234567890123456789',
-            'sk_test_secret'
+            'sk_test_secret:'
         );
 
         $client = new WipopClient($configuration);
@@ -64,7 +63,6 @@ class WipopClientTest extends TestCase
 
         $this->assertSame($configuration, $client->getConfiguration());
         $this->assertInstanceOf(CheckoutOperation::class, $client->checkoutOperation());
-        $this->assertInstanceOf(ChargeOperation::class, $client->chargeOperation());
     }
 
     private function extractHttpClient(WipopClient $client): GuzzleHttpClient
