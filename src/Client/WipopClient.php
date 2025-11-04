@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Wipop\Client;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Wipop\CardPayment\CardPayment;
 use Wipop\CardPayment\CardPaymentResponse;
 use Wipop\CardPayment\CardPaymentService;
 use Wipop\Checkout\Checkout;
 use Wipop\Checkout\CheckoutResponse;
 use Wipop\Checkout\CheckoutService;
+use Wipop\Client\Http\GuzzleHttpClient;
+use Wipop\Client\Http\HttpClientInterface;
 use Wipop\RecurrentPayment\RecurrentPayment;
 use Wipop\RecurrentPayment\RecurrentPaymentResponse;
 use Wipop\RecurrentPayment\RecurrentPaymentService;
@@ -20,12 +24,23 @@ final class WipopClient
     private readonly CheckoutService $checkoutService;
     private readonly RecurrentPaymentService $recurrentPaymentService;
     private readonly ClientConfiguration $configuration;
+    private readonly HttpClientInterface $httpClient;
+    private readonly LoggerInterface $logger;
 
-    public function __construct(ClientConfiguration $configuration)
-    {
+    public function __construct(
+        ClientConfiguration $configuration,
+        ?LoggerInterface $logger = null,
+        ?HttpClientInterface $httpClient = null,
+    ) {
         $this->configuration = $configuration;
+        $this->logger = $logger ?? new NullLogger();
+        $this->httpClient = $httpClient ?? new GuzzleHttpClient($this->configuration);
         $this->cardPaymentService = new CardPaymentService();
-        $this->checkoutService = new CheckoutService();
+        $this->checkoutService = new CheckoutService(
+            $this->httpClient,
+            $this->configuration,
+            $this->logger
+        );
         $this->recurrentPaymentService = new RecurrentPaymentService();
     }
 

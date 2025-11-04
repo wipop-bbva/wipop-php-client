@@ -6,7 +6,7 @@ namespace Wipop\Customer;
 
 use DateTimeImmutable;
 
-final class Customer
+final class Customer implements CustomerInterface
 {
     public function __construct(
         private readonly string $name,

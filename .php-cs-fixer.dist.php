@@ -42,6 +42,7 @@ return (new Config())
         ],
         'phpdoc_summary' => false,
         'yoda_style' => false,
+        'concat_space' => ['spacing' => 'one'],
     ])
     ->setFinder($finder)
     ->setCacheFile(__DIR__ . '/var/.php-cs-fixer.cache');

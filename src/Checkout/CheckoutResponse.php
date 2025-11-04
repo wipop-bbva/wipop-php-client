@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Wipop\Checkout;
 
 use DateTimeImmutable;
-use Wipop\Customer\Customer;
+use Wipop\Customer\CustomerInterface;
 use Wipop\Utils\OrderId;
 
 final class CheckoutResponse
@@ -19,7 +19,7 @@ final class CheckoutResponse
         public readonly string $checkoutLink,
         public readonly DateTimeImmutable $creationDate,
         public readonly DateTimeImmutable $expirationDate,
-        public readonly Customer $customer,
+        public readonly CustomerInterface $customer,
     ) {
     }
 
@@ -63,7 +63,7 @@ final class CheckoutResponse
         return $this->expirationDate;
     }
 
-    public function getCustomer(): Customer
+    public function getCustomer(): CustomerInterface
     {
         return $this->customer;
     }
