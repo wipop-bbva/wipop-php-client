@@ -9,3 +9,4 @@ parameters:
     tmpDir: var/phpstan
     ignoreErrors:
         - message: '#.*#'
+          path: tests/Checkout/CheckoutOperationTest.php
