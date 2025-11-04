@@ -12,4 +12,5 @@ parameters:
         - message: '#.*#'
           paths:
               - tests/Checkout/CheckoutOperationTest.php
-              - tests/Charge/ChargeOperationTest.php
+              - tests/Charge/ChargeOperation/**.php
+
