@@ -3,6 +3,7 @@ parameters:
     paths:
         - src
         - tests
+        - examples
     reportUnmatchedIgnoredErrors: true
     treatPhpDocTypesAsCertain: true
     checkImplicitMixed: true

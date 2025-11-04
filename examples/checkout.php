@@ -16,7 +16,7 @@ use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
 require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/utils.php';
+require __DIR__ . '/exampleUtils.php';
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();

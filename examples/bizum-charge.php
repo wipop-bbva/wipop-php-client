@@ -16,7 +16,6 @@ use Wipop\Examples\ExampleUtils;
 use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
-use Wipop\Utils\Currency;
 
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/exampleUtils.php';
@@ -32,7 +31,7 @@ if ($merchantId === false || $secretKey === false) {
     exit(1);
 }
 
-$logger = new Logger('wipop-card-charge-example', [new StreamHandler('php://stdout')]);
+$logger = new Logger('wipop-bizum-charge-example', [new StreamHandler('php://stdout')]);
 
 $configuration = new ClientConfiguration(
     Environment::SANDBOX,
@@ -41,25 +40,23 @@ $configuration = new ClientConfiguration(
 );
 
 $client = new WipopClient($configuration, $logger);
+
 $customer = new Customer(
-    'Ana',
-    'García',
-    'ana.garcia@example.com',
-    publicId: null,
-    externalId: 'ext999',
-    phoneNumber: '+34611111111',
-    address: null
+    'Carlos',
+    'López',
+    'carlos.lopez@example.com'
 );
+
 $chargeParams = (new ChargeParams())
     ->setAmount(15.00)
-    ->setMethod(ChargeMethod::CARD)
+    ->setMethod(ChargeMethod::BIZUM)
     ->setProductType(ProductType::PAYMENT_LINK)
     ->setOriginChannel(OriginChannel::API)
     ->setTerminal(new Terminal(1))
     ->setOrderId(OrderId::fromString(ExampleUtils::randomOrderId()))
-    ->setDescription('Compra test tarjeta')
+    ->setDescription('Compra test Bizum')
     ->setRedirectUrl('https://miweb.com/callback')
-    ->setCurrency(Currency::EUR)
+    ->setCurrency('EUR')
     ->setCapture(true)
     ->setCustomer($customer)
     ->setLanguage('es')
@@ -68,13 +65,13 @@ $chargeParams = (new ChargeParams())
 try {
     $response = $client->chargeOperation()->create($chargeParams);
 } catch (Throwable $exception) {
-    $logger->error('Card charge example failed', ['exception' => $exception]);
+    $logger->error('Bizum charge example failed', ['exception' => $exception]);
     fwrite(STDERR, sprintf("Charge failed: %s\n", $exception->getMessage()));
     exit(1);
 }
 
 printf(
-    "Charge created successfully!\nStatus: %s\nTransaction ID: %s\n",
+    "Bizum charge created!\nStatus: %s\nTransaction ID: %s\n",
     $response['status'] ?? 'UNKNOWN',
     $response['id'] ?? 'N/A'
 );
