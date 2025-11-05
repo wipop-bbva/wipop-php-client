@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Wipop\Tests\Charge\ChargeOperation;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -30,18 +29,20 @@ abstract class AbstractChargeOperationTestCase extends TestCase
         $history = [];
         $handlerStack->push(Middleware::history($history));
 
-        $client = new Client([
-            'handler' => $handlerStack,
-            'base_uri' => ClientConfiguration::SANDBOX_API_URL,
-        ]);
-
         $configuration = new ClientConfiguration(
             Environment::SANDBOX,
             self::MERCHANT_ID,
             'sk_test_secret'
         );
 
-        return new ChargeOperation(new GuzzleHttpClient($client), $configuration);
+        $httpClient = new GuzzleHttpClient(
+            $configuration,
+            [
+                'handler' => $handlerStack,
+            ]
+        );
+
+        return new ChargeOperation($httpClient, $configuration);
     }
 
     protected function successResponse(): Response

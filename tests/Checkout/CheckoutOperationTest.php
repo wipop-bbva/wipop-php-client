@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Wipop\Tests\Checkout;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -344,18 +343,20 @@ class CheckoutOperationTest extends TestCase
         $history = [];
         $handlerStack->push(Middleware::history($history));
 
-        $client = new Client([
-            'handler' => $handlerStack,
-            'base_uri' => ClientConfiguration::SANDBOX_API_URL,
-        ]);
-
         $configuration = new ClientConfiguration(
             Environment::SANDBOX,
             self::MERCHANT_ID,
             'sk_test_secret'
         );
 
-        return new CheckoutOperation(new GuzzleHttpClient($client), $configuration);
+        $httpClient = new GuzzleHttpClient(
+            $configuration,
+            [
+                'handler' => $handlerStack,
+            ]
+        );
+
+        return new CheckoutOperation($httpClient, $configuration);
     }
 
     private function assertCheckoutResponse(CheckoutResponse $response, bool $expectsCustomer = true): void
