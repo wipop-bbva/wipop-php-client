@@ -151,8 +151,6 @@ final class ChargeParams extends RequestBuilder
             throw new InvalidArgumentException('Terminal parameter must be an instance of Terminal.');
         }
 
-        $customer = $parameters['customer'] ?? null;
-
         $orderId = $parameters['order_id'] ?? null;
 
         $payload = [
@@ -166,9 +164,13 @@ final class ChargeParams extends RequestBuilder
             'terminal' => TerminalPayload::fromTerminal($terminal),
             'redirect_url' => $parameters['redirect_url'] ?? '',
             'order_id' => $orderId instanceof OrderId ? $orderId->value() : '',
-            'customer' => CustomerPayload::fromCustomer($customer instanceof Customer ? $customer : null),
             'language' => $parameters['language'] ?? Language::SPANISH,
         ];
+
+        $customer = $parameters['customer'] ?? null;
+        if ($customer instanceof Customer) {
+            $payload['customer'] = CustomerPayload::fromCustomer($customer);
+        }
 
         $payload['capture'] = array_key_exists('capture', $parameters)
             ? (bool) $parameters['capture']

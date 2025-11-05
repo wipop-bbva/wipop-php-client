@@ -10,7 +10,6 @@ use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
-use Wipop\Customer\Customer;
 use Wipop\Utils\Currency;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
@@ -27,13 +26,6 @@ final class BizumChargeOperationTest extends AbstractChargeOperationTestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
-        $customer = new Customer(
-            name: 'Carlos',
-            lastName: 'López',
-            email: 'carlos.lopez@example.com',
-            publicId: 'cust_123'
-        );
-
         $params = (new ChargeParams())
             ->setAmount(45.0)
             ->setMethod(ChargeMethod::BIZUM)
@@ -45,10 +37,9 @@ final class BizumChargeOperationTest extends AbstractChargeOperationTestCase
             ->setRedirectUrl('https://miweb.com/callback')
             ->setLanguage('es')
             ->setSendEmail(false)
-            ->setCustomer($customer)
         ;
 
-        $operation->create($params);
+        $operation->create($params, 'cust_123');
 
         $this->assertRequest(
             $history[0]['request'],
@@ -67,5 +58,8 @@ final class BizumChargeOperationTest extends AbstractChargeOperationTestCase
                 'terminal' => ['id' => 1],
             ]
         );
+
+        $payload = $this->decodeRequestBody($history[0]['request']);
+        $this->assertArrayNotHasKey('customer', $payload);
     }
 }

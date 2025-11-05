@@ -9,4 +9,3 @@ final class ChargeMethod
     public const CARD = 'CARD';
     public const BIZUM = 'BIZUM';
 }
-

@@ -56,13 +56,6 @@ class ChargeParamsTest extends TestCase
                 'terminal' => ['id' => 1],
                 'redirect_url' => 'https://example.com',
                 'order_id' => '1234ABCDEFGH',
-                'customer' => [
-                    'name' => '',
-                    'last_name' => '',
-                    'email' => '',
-                    'phone_number' => '',
-                    'external_id' => '',
-                ],
                 'language' => Language::SPANISH,
                 'capture' => true,
             ],
