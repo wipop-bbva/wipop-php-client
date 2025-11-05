@@ -7,6 +7,7 @@ namespace Wipop\Tests\Charge;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Wipop\CardPayment\Card;
 use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
@@ -34,7 +35,7 @@ class ChargeParamsTest extends TestCase
             ->setCurrency(Currency::EUR)
             ->setProductType(ProductType::PAYMENT_LINK)
             ->setOriginChannel(OriginChannel::API)
-            ->setDescription('Test charge')
+            ->setDescription('Cargo de prueba')
             ->setOrderId(OrderId::fromString('1234ABCDEFGH'))
             ->setRedirectUrl('https://example.com')
             ->setSendEmail(false)
@@ -48,7 +49,7 @@ class ChargeParamsTest extends TestCase
             [
                 'amount' => 100.0,
                 'method' => ChargeMethod::CARD,
-                'description' => 'Test charge',
+                'description' => 'Cargo de prueba',
                 'send_email' => false,
                 'currency' => Currency::EUR,
                 'origin_channel' => OriginChannel::API,
@@ -67,9 +68,9 @@ class ChargeParamsTest extends TestCase
     public function itIncludesCustomerDetailsWhenProvided(): void
     {
         $customer = new Customer(
-            name: 'Carlos',
-            lastName: 'López',
-            email: 'carlos.lopez@example.com',
+            name: 'Ana',
+            lastName: 'García',
+            email: 'ana.garcia@example.com',
             publicId: 'ext999',
             externalId: '123456',
             phoneNumber: '+34611111111'
@@ -78,7 +79,7 @@ class ChargeParamsTest extends TestCase
         $params = (new ChargeParams())
             ->setAmount(55.5)
             ->setMethod(ChargeMethod::CARD)
-            ->setTerminal(new Terminal(2))
+            ->setTerminal(new Terminal(1))
             ->setCustomer($customer)
             ->setSendEmail(true)
             ->setLanguage('es')
@@ -95,9 +96,9 @@ class ChargeParamsTest extends TestCase
         $this->assertTrue($payload['capture']);
         $this->assertSame(
             [
-                'name' => 'Carlos',
-                'last_name' => 'López',
-                'email' => 'carlos.lopez@example.com',
+                'name' => 'Ana',
+                'last_name' => 'García',
+                'email' => 'ana.garcia@example.com',
                 'external_id' => '123456',
                 'phone_number' => '+34611111111',
             ],
@@ -108,6 +109,14 @@ class ChargeParamsTest extends TestCase
     #[Test]
     public function itBuildsGatewayPayloadWithCardData(): void
     {
+        $card = new Card(
+            cardNumber: '4111111111111111',
+            expirationYear: '27',
+            expirationMonth: '12',
+            holderName: 'Carlos López',
+            cvv2: '123',
+        );
+
         $params = (new ChargeParams())
             ->setAmount(100.0)
             ->setMethod(ChargeMethod::CARD)
@@ -115,23 +124,17 @@ class ChargeParamsTest extends TestCase
             ->setOriginChannel(OriginChannel::API)
             ->setTerminal(new Terminal(1))
             ->setCurrency(Currency::EUR)
-            ->setDescription('Direct gateway charge')
-            ->setCardPayload([
-                'card_number' => '4111111111111111',
-                'holder_name' => 'John Doe',
-                'expiration_year' => '27',
-                'expiration_month' => '12',
-                'cvv2' => '123',
-            ])
+            ->setDescription('Cargo directo en pasarela')
+            ->setCard($card)
         ;
 
         $payload = $params->toArray();
 
         $this->assertSame(ProductType::PAYMENT_GATEWAY, $payload['product_type']);
-        $this->assertSame('Direct gateway charge', $payload['description']);
+        $this->assertSame('Cargo directo en pasarela', $payload['description']);
         $this->assertSame([
             'card_number' => '4111111111111111',
-            'holder_name' => 'John Doe',
+            'holder_name' => 'Carlos López',
             'expiration_year' => '27',
             'expiration_month' => '12',
             'cvv2' => '123',

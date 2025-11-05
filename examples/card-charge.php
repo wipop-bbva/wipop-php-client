@@ -74,7 +74,7 @@ try {
 }
 
 printf(
-    "Charge created successfully!\nStatus: %s\nTransaction ID: %s\n",
+    "Card charge created successfully!\nStatus: %s\nTransaction ID: %s\n",
     $response['status'] ?? 'UNKNOWN',
     $response['id'] ?? 'N/A'
 );

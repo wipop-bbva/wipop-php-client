@@ -18,7 +18,6 @@ use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
 use function array_key_exists;
-use function is_array;
 use function sprintf;
 
 /**
@@ -91,27 +90,9 @@ final class ChargeParams extends RequestBuilder
         return $this->with('language', $language);
     }
 
-    public function setCard(Card $card, ?string $cvv2 = null, ?string $holderName = null): self
+    public function setCard(Card $card): self
     {
-        $payload = CardPayload::fromCard($card);
-
-        if ($cvv2 !== null) {
-            $payload['cvv2'] = $cvv2;
-        }
-
-        if ($holderName !== null) {
-            $payload['holder_name'] = $holderName;
-        }
-
-        return $this->with('card', $payload);
-    }
-
-    /**
-     * @param array<string, string> $cardPayload
-     */
-    public function setCardPayload(array $cardPayload): self
-    {
-        return $this->with('card', $cardPayload);
+        return $this->with('card', $card);
     }
 
     public function setSourceId(string $sourceId): self
@@ -193,13 +174,9 @@ final class ChargeParams extends RequestBuilder
             $payload['post_type'] = $postType->toArray();
         }
 
-        if (array_key_exists('card', $parameters)) {
-            $cardPayload = $parameters['card'];
-            if (!is_array($cardPayload)) {
-                throw new InvalidArgumentException('Card payload must be an array.');
-            }
-
-            $payload['card'] = $cardPayload;
+        $card = $parameters['card'] ?? null;
+        if ($card instanceof Card) {
+            $payload['card'] = CardPayload::fromCard($card);
         }
 
         return $payload;

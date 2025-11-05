@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Wipop\CardPayment\Card;
 use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
 use Wipop\Charge\ChargeParams;
@@ -77,13 +78,13 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
             ->setTerminal(new Terminal(1))
             ->setCurrency(Currency::EUR)
             ->setDescription('Direct gateway charge')
-            ->setCardPayload([
-                'card_number' => '4111111111111111',
-                'holder_name' => 'Carlos López',
-                'expiration_year' => '27',
-                'expiration_month' => '12',
-                'cvv2' => '123',
-            ])
+            ->setCard(new Card(
+                cardNumber: '4111111111111111',
+                expirationYear: '27',
+                expirationMonth: '12',
+                holderName: 'Carlos López',
+                cvv2: '123',
+            ))
         ;
 
         $operation->create($params);

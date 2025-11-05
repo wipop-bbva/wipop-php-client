@@ -17,10 +17,11 @@ final class CardPayload
     public static function fromCard(Card $card): array
     {
         return [
-            'id' => $card->getId(),
-            'number' => $card->getNumber(),
+            'card_number' => $card->getCardNumber(),
+            'holder_name' => $card->getHolderName(),
             'expiration_year' => $card->getExpirationYear(),
             'expiration_month' => $card->getExpirationMonth(),
+            'cvv2' => $card->getCvv2(),
         ];
     }
 }

@@ -33,47 +33,7 @@ final class ChargeOperation extends AbstractOperation
 
         return $this->post($path, $payload);
     }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function confirm(string $transactionId, ConfirmChargeParams $params, ?string $customerId = null): array
-    {
-        $path = $this->buildChargePath($transactionId, '/confirm', $customerId);
-
-        return $this->post($path, $params->toArray());
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function refund(string $transactionId, RefundParams $params): array
-    {
-        $path = $this->buildChargePath($transactionId, '/refund');
-
-        return $this->post($path, $params->toArray());
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function reversal(string $transactionId, ReversalParams $params, ?string $customerId = null): array
-    {
-        $path = $this->buildChargePath($transactionId, '/reversal', $customerId);
-
-        return $this->post($path, $params->toArray());
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function capture(string $transactionId, CaptureParams $params, ?string $customerId = null): array
-    {
-        $path = $this->buildChargePath($transactionId, '/capture', $customerId);
-
-        return $this->post($path, $params->toArray());
-    }
-
+   
     private function buildCreatePath(ChargeParams $params, ?string $customerId = null): string
     {
         $prefix = $this->resolveMethodPrefix($params->getMethod());
@@ -86,22 +46,6 @@ final class ChargeOperation extends AbstractOperation
         return sprintf('%s/v1/%s/charges', $prefix, $merchantId);
     }
 
-    private function buildChargePath(string $transactionId, string $suffix, ?string $customerId = null): string
-    {
-        $merchantId = $this->getConfiguration()->getMerchantId();
-
-        if ($customerId !== null) {
-            return sprintf(
-                '/c/v1/%s/customers/%s/charges/%s%s',
-                $merchantId,
-                $customerId,
-                $transactionId,
-                $suffix
-            );
-        }
-
-        return sprintf('/c/v1/%s/charges/%s%s', $merchantId, $transactionId, $suffix);
-    }
 
     private function resolveMethodPrefix(string $method): string
     {
