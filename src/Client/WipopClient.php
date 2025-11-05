@@ -6,23 +6,13 @@ namespace Wipop\Client;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Wipop\CardPayment\CardPayment;
-use Wipop\CardPayment\CardPaymentResponse;
-use Wipop\CardPayment\CardPaymentService;
-use Wipop\Checkout\Checkout;
-use Wipop\Checkout\CheckoutResponse;
-use Wipop\Checkout\CheckoutService;
+use Wipop\Checkout\CheckoutOperation;
 use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Client\Http\HttpClientInterface;
-use Wipop\RecurrentPayment\RecurrentPayment;
-use Wipop\RecurrentPayment\RecurrentPaymentResponse;
-use Wipop\RecurrentPayment\RecurrentPaymentService;
 
 final class WipopClient
 {
-    private readonly CardPaymentService $cardPaymentService;
-    private readonly CheckoutService $checkoutService;
-    private readonly RecurrentPaymentService $recurrentPaymentService;
+    private readonly CheckoutOperation $checkoutOperation;
     private readonly ClientConfiguration $configuration;
     private readonly HttpClientInterface $httpClient;
     private readonly LoggerInterface $logger;
@@ -35,13 +25,11 @@ final class WipopClient
         $this->configuration = $configuration;
         $this->logger = $logger ?? new NullLogger();
         $this->httpClient = $httpClient ?? new GuzzleHttpClient($this->configuration);
-        $this->cardPaymentService = new CardPaymentService();
-        $this->checkoutService = new CheckoutService(
+        $this->checkoutOperation = new CheckoutOperation(
             $this->httpClient,
             $this->configuration,
             $this->logger
         );
-        $this->recurrentPaymentService = new RecurrentPaymentService();
     }
 
     public function getConfiguration(): ClientConfiguration
@@ -49,18 +37,8 @@ final class WipopClient
         return $this->configuration;
     }
 
-    public function checkoutPayment(Checkout $checkout): CheckoutResponse
+    public function checkoutOperation(): CheckoutOperation
     {
-        return $this->checkoutService->pay($checkout);
-    }
-
-    public function cardPayment(CardPayment $cardPayment): CardPaymentResponse
-    {
-        return $this->cardPaymentService->pay($cardPayment);
-    }
-
-    public function recurrentPayment(RecurrentPayment $recurrentPayment): RecurrentPaymentResponse
-    {
-        return $this->recurrentPaymentService->pay($recurrentPayment);
+        return $this->checkoutOperation;
     }
 }

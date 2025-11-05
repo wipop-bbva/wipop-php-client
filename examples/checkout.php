@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Dotenv\Dotenv;
-use Wipop\Checkout\Checkout;
+use Wipop\Checkout\CheckoutParams;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
@@ -14,7 +14,7 @@ use Wipop\Utils\Terminal;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
@@ -47,19 +47,18 @@ $customer = new Customer(
     address: null
 );
 
-$checkout = new Checkout(
-    amount: 49.95,
-    productType: ProductType::PAYMENT_LINK,
-    terminal: new Terminal(0),
-    orderId: OrderId::fromString('8887c5RfrfKD'),
-    customer: $customer,
-    redirectUrl: 'https://miweb.com/callback',
-    description: 'Prueba integrador externo QA',
-    sendEmail: true
-);
+$checkout = (new CheckoutParams())
+    ->setAmount(49.95)
+    ->setProductType(ProductType::PAYMENT_LINK)
+    ->setTerminal(new Terminal(0))
+    ->setOrderId(OrderId::fromString('8887c5RfrfKD'))
+    ->setCustomer($customer)
+    ->setRedirectUrl('https://miweb.com/callback')
+    ->setDescription('Prueba integrador externo QA')
+    ->setSendEmail(true);
 
 try {
-    $response = $client->checkoutPayment($checkout);
+    $response = $client->checkoutOperation()->create($checkout);
 } catch (Throwable $exception) {
     $logger->error('Checkout example failed', ['exception' => $exception]);
     fwrite(STDERR, sprintf("Checkout failed: %s\n", $exception->getMessage()));
