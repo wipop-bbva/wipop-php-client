@@ -16,10 +16,10 @@ final class PostType
     }
 
     /**
-     * @return array{mode: PostTypeMode}
+     * @return array{mode: string}
      */
     public function toArray(): array
     {
-        return ['mode' => $this->mode];
+        return ['mode' => $this->mode->value];
     }
 }
