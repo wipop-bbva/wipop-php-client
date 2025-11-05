@@ -152,7 +152,7 @@ class ChargeParamsTest extends TestCase
             ->setOriginChannel(OriginChannel::API)
             ->setTerminal(new Terminal(1))
             ->setUseCof(true)
-            ->setDescription('Tokenize card via hosted form')
+            ->setDescription('Tokenize card')
         ;
 
         $payload = $params->toArray();

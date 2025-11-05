@@ -7,8 +7,6 @@ namespace Wipop\Tests\Charge\ChargeOperation;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Wipop\CardPayment\Card;
 use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
@@ -89,7 +87,6 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
 
         $operation->create($params);
 
-        /** @var array<int, array{request: RequestInterface, response: null|ResponseInterface, error: mixed, options: array<string, mixed>}> $history */
         $payload = $this->decodeRequestBody($history[0]['request']);
 
         $this->assertSame('Direct gateway charge', $payload['description']);
@@ -109,9 +106,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
-        $params = (new ChargeParams())
-            ->setAmount(10.0)
-        ;
+        $params = (new ChargeParams())->setAmount(10.0);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Charge terminal is required.');

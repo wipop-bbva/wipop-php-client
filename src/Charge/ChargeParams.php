@@ -21,7 +21,7 @@ use function array_key_exists;
 use function sprintf;
 
 /**
- * Charge params builder implementation restricted to the supported payload fields.
+ * Charge params builder implementation.
  */
 final class ChargeParams extends RequestBuilder
 {

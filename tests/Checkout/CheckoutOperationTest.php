@@ -14,9 +14,6 @@ use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Throwable;
 use Wipop\Checkout\Checkout;
 use Wipop\Checkout\CheckoutOperation;
 use Wipop\Checkout\CheckoutParams;
@@ -54,13 +51,6 @@ class CheckoutOperationTest extends TestCase
     #[Test]
     public function itSendsCheckoutRequestForGuestCustomer(): void
     {
-        /** @var array<int, array{
-         *     request: RequestInterface,
-         *     response: null|ResponseInterface,
-         *     error: null|Throwable,
-         *     options: array<string, mixed>
-         * }> $history
-         */
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
@@ -309,9 +299,6 @@ class CheckoutOperationTest extends TestCase
         }
     }
 
-    /**
-     * @param array<string, mixed> $overrides
-     */
     private function successResponse(array $overrides = []): Response
     {
         $payload = [
