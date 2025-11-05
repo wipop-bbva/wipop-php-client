@@ -9,6 +9,11 @@
       "Wipop\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Wipop\\Tests\\": "tests/"
+    }
+  },
   "minimum-stability": "stable",
   "require": {
     "php": ">=8.1.0",
