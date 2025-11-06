@@ -30,17 +30,17 @@ class ChargeParamsTest extends TestCase
     public function itBuildsChargePayloadWithDefaults(): void
     {
         $params = (new ChargeParams())
-            ->setAmount(100.0)
-            ->setMethod(ChargeMethod::CARD)
-            ->setCurrency(Currency::EUR)
-            ->setProductType(ProductType::PAYMENT_LINK)
-            ->setOriginChannel(OriginChannel::API)
-            ->setDescription('Cargo de prueba')
-            ->setOrderId(OrderId::fromString('1234ABCDEFGH'))
-            ->setRedirectUrl('https://example.com')
-            ->setSendEmail(false)
-            ->setTerminal(new Terminal(1))
-            ->setLanguage(Language::SPANISH)
+            ->amount(100.0)
+            ->method(ChargeMethod::CARD)
+            ->currency(Currency::EUR)
+            ->productType(ProductType::PAYMENT_LINK)
+            ->originChannel(OriginChannel::API)
+            ->description('Cargo de prueba')
+            ->orderId(OrderId::fromString('1234ABCDEFGH'))
+            ->redirectUrl('https://example.com')
+            ->sendEmail(false)
+            ->terminal(new Terminal(1))
+            ->language(Language::SPANISH)
         ;
 
         $payload = $params->toArray();
@@ -77,15 +77,15 @@ class ChargeParamsTest extends TestCase
         );
 
         $params = (new ChargeParams())
-            ->setAmount(55.5)
-            ->setMethod(ChargeMethod::CARD)
-            ->setTerminal(new Terminal(1))
-            ->setCustomer($customer)
-            ->setSendEmail(true)
-            ->setLanguage('es')
-            ->setOriginChannel(OriginChannel::PAYMENT_LINK)
-            ->setProductType(ProductType::PAYMENT_GATEWAY)
-            ->setCapture(true)
+            ->amount(55.5)
+            ->method(ChargeMethod::CARD)
+            ->terminal(new Terminal(1))
+            ->customer($customer)
+            ->sendEmail(true)
+            ->language('es')
+            ->originChannel(OriginChannel::PAYMENT_LINK)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->capture(true)
         ;
 
         $payload = $params->toArray();
@@ -118,14 +118,14 @@ class ChargeParamsTest extends TestCase
         );
 
         $params = (new ChargeParams())
-            ->setAmount(100.0)
-            ->setMethod(ChargeMethod::CARD)
-            ->setProductType(ProductType::PAYMENT_GATEWAY)
-            ->setOriginChannel(OriginChannel::API)
-            ->setTerminal(new Terminal(1))
-            ->setCurrency(Currency::EUR)
-            ->setDescription('Cargo directo en pasarela')
-            ->setCard($card)
+            ->amount(100.0)
+            ->method(ChargeMethod::CARD)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->originChannel(OriginChannel::API)
+            ->terminal(new Terminal(1))
+            ->currency(Currency::EUR)
+            ->description('Cargo directo en pasarela')
+            ->card($card)
         ;
 
         $payload = $params->toArray();
@@ -146,13 +146,13 @@ class ChargeParamsTest extends TestCase
     public function itBuildsTokenizationPayload(): void
     {
         $params = (new ChargeParams())
-            ->setAmount(0.0)
-            ->setMethod(ChargeMethod::CARD)
-            ->setProductType(ProductType::PAYMENT_LINK)
-            ->setOriginChannel(OriginChannel::API)
-            ->setTerminal(new Terminal(1))
-            ->setUseCof(true)
-            ->setDescription('Tokenize card')
+            ->amount(0.0)
+            ->method(ChargeMethod::CARD)
+            ->productType(ProductType::PAYMENT_LINK)
+            ->originChannel(OriginChannel::API)
+            ->terminal(new Terminal(1))
+            ->useCof(true)
+            ->description('Tokenize card')
         ;
 
         $payload = $params->toArray();
@@ -166,16 +166,16 @@ class ChargeParamsTest extends TestCase
     public function itBuildsGatewayPayloadWithToken(): void
     {
         $params = (new ChargeParams())
-            ->setAmount(35.0)
-            ->setMethod(ChargeMethod::CARD)
-            ->setProductType(ProductType::PAYMENT_GATEWAY)
-            ->setOriginChannel(OriginChannel::API)
-            ->setTerminal(new Terminal(1))
-            ->setSourceId('card_tok_12345')
-            ->setUseCof(true)
-            ->setPostType(new PostType(PostTypeMode::RECURRENT))
-            ->setCapture(false)
-            ->setDescription('MIT recurring charge')
+            ->amount(35.0)
+            ->method(ChargeMethod::CARD)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->originChannel(OriginChannel::API)
+            ->terminal(new Terminal(1))
+            ->sourceId('card_tok_12345')
+            ->useCof(true)
+            ->postType(new PostType(PostTypeMode::RECURRENT))
+            ->capture(false)
+            ->description('MIT recurring charge')
         ;
 
         $payload = $params->toArray();

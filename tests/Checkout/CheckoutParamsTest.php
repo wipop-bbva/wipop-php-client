@@ -23,9 +23,9 @@ final class CheckoutParamsTest extends TestCase
         $expirationDate = new DateTimeImmutable('2025-10-31T15:05:06');
 
         $payload = (new CheckoutParams())
-            ->setAmount(10.0)
-            ->setTerminal(new Terminal(42))
-            ->setExpirationDate($expirationDate)
+            ->amount(10.0)
+            ->terminal(new Terminal(42))
+            ->expirationDate($expirationDate)
             ->toArray()
         ;
 

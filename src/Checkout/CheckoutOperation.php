@@ -6,33 +6,28 @@ namespace Wipop\Checkout;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Wipop\Checkout\Response\CheckoutResponseFactory;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Exception\WipopApiExceptionFactory;
 use Wipop\Client\Http\HttpClientInterface;
 use Wipop\Client\Operation\AbstractOperation;
+use Wipop\Domain\Checkout as CheckoutResult;
 use Wipop\Utils\ChargeStatus;
 
 final class CheckoutOperation extends AbstractOperation
 {
-    private readonly CheckoutResponseFactory $checkoutResponseFactory;
-
     public function __construct(
         HttpClientInterface $httpClient,
         ClientConfiguration $configuration,
         ?LoggerInterface $logger = null,
     ) {
         parent::__construct($httpClient, $configuration, $logger ?? new NullLogger());
-        $this->checkoutResponseFactory = new CheckoutResponseFactory();
     }
 
     /**
-     * Creates a checkout using either the domain object or its params representation.
+     * Creates a checkout using its params representation.
      */
-    public function create(Checkout|CheckoutParams $checkout): CheckoutResponse
+    public function create(CheckoutParams $params): CheckoutResult
     {
-        $params = $checkout instanceof CheckoutParams ? $checkout : CheckoutParams::fromCheckout($checkout);
-
         $data = $this->post(
             $this->getEndpointPath($params),
             $params->toArray()
@@ -40,7 +35,7 @@ final class CheckoutOperation extends AbstractOperation
 
         $this->assertSuccess($data);
 
-        return $this->checkoutResponseFactory->fromArray($data);
+        return $this->hydrate(CheckoutResult::class, $data);
     }
 
     /**

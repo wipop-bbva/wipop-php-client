@@ -10,6 +10,8 @@ use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
+use Wipop\Domain\Charge as ChargeResult;
+use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\Currency;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
@@ -27,19 +29,21 @@ final class BizumChargeOperationTest extends AbstractChargeOperationTestCase
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
         $params = (new ChargeParams())
-            ->setAmount(45.0)
-            ->setMethod(ChargeMethod::BIZUM)
-            ->setTerminal(new Terminal(1))
-            ->setProductType(ProductType::PAYMENT_LINK)
-            ->setCurrency(Currency::EUR)
-            ->setDescription('Compra test Bizum')
-            ->setOriginChannel(OriginChannel::API)
-            ->setRedirectUrl('https://miweb.com/callback')
-            ->setLanguage('es')
-            ->setSendEmail(false)
+            ->amount(45.0)
+            ->method(ChargeMethod::BIZUM)
+            ->terminal(new Terminal(1))
+            ->productType(ProductType::PAYMENT_LINK)
+            ->currency(Currency::EUR)
+            ->description('Compra test Bizum')
+            ->originChannel(OriginChannel::API)
+            ->redirectUrl('https://miweb.com/callback')
+            ->language('es')
+            ->sendEmail(false)
         ;
 
-        $operation->create($params, 'cust_123');
+        $response = $operation->create($params, 'cust_123');
+        $this->assertInstanceOf(ChargeResult::class, $response);
+        $this->assertSame(TransactionStatus::CHARGE_PENDING, $response->status);
 
         $this->assertRequest(
             $history[0]['request'],

@@ -21,67 +21,67 @@ use Wipop\Utils\Terminal;
  */
 final class CheckoutParams extends RequestBuilder
 {
-    public function setAmount(float $amount): self
+    public function amount(float $amount): self
     {
         return $this->with('amount', $amount);
     }
 
-    public function setCurrency(string $currency): self
+    public function currency(string $currency): self
     {
         return $this->with('currency', $currency);
     }
 
-    public function setOrderId(OrderId $orderId): self
+    public function orderId(OrderId $orderId): self
     {
         return $this->with('order_id', $orderId);
     }
 
-    public function setDescription(string $description): self
+    public function description(string $description): self
     {
         return $this->with('description', $description);
     }
 
-    public function setProductType(string $productType): self
+    public function productType(string $productType): self
     {
         return $this->with('product_type', $productType);
     }
 
-    public function setOrigin(string $origin): self
+    public function origin(string $origin): self
     {
         return $this->with('origin', $origin);
     }
 
-    public function setRedirectUrl(string $redirectUrl): self
+    public function redirectUrl(string $redirectUrl): self
     {
         return $this->with('redirect_url', $redirectUrl);
     }
 
-    public function setSendEmail(bool $sendEmail): self
+    public function sendEmail(bool $sendEmail): self
     {
         return $this->with('send_email', $sendEmail);
     }
 
-    public function setCustomer(?Customer $customer): self
+    public function customer(?Customer $customer): self
     {
         return $this->with('customer', $customer);
     }
 
-    public function setTerminal(Terminal $terminal): self
+    public function terminal(Terminal $terminal): self
     {
         return $this->with('terminal', $terminal);
     }
 
-    public function setCapture(bool $capture): self
+    public function capture(bool $capture): self
     {
         return $this->with('capture', $capture);
     }
 
-    public function setExpirationDate(DateTimeImmutable $expirationDate): self
+    public function expirationDate(DateTimeImmutable $expirationDate): self
     {
         return $this->with('expiration_date', $expirationDate);
     }
 
-    public function setLanguage(string $language): self
+    public function language(string $language): self
     {
         return $this->with('language', $language);
     }
@@ -151,35 +151,5 @@ final class CheckoutParams extends RequestBuilder
         $customer = $parameters['customer'];
 
         return $customer instanceof Customer ? $customer : null;
-    }
-
-    public static function fromCheckout(Checkout $checkout): self
-    {
-        $params = new self();
-        $params->setAmount($checkout->getAmount())
-            ->setProductType($checkout->getProductType())
-            ->setTerminal($checkout->getTerminal())
-            ->setCurrency($checkout->getCurrency())
-            ->setOrigin($checkout->getOrigin())
-            ->setSendEmail($checkout->isSendEmail())
-        ;
-
-        if ($checkout->getOrderId() !== null) {
-            $params->setOrderId($checkout->getOrderId());
-        }
-
-        if ($checkout->getCustomer() !== null) {
-            $params->setCustomer($checkout->getCustomer());
-        }
-
-        if ($checkout->getRedirectUrl() !== null) {
-            $params->setRedirectUrl($checkout->getRedirectUrl());
-        }
-
-        if ($checkout->getDescription() !== null) {
-            $params->setDescription($checkout->getDescription());
-        }
-
-        return $params;
     }
 }
