@@ -3,9 +3,14 @@ parameters:
     paths:
         - src
         - tests
+        - examples
     reportUnmatchedIgnoredErrors: true
     treatPhpDocTypesAsCertain: true
     checkImplicitMixed: true
     tmpDir: var/phpstan
     ignoreErrors:
         - message: '#.*#'
+          paths:
+              - tests/Checkout/CheckoutOperationTest.php
+              - tests/Charge/ChargeOperation/**.php
+

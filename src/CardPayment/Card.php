@@ -7,21 +7,17 @@ namespace Wipop\CardPayment;
 final class Card
 {
     public function __construct(
-        private readonly string $id,
-        private readonly string $number,
+        private readonly string $cardNumber,
         private readonly string $expirationYear,
         private readonly string $expirationMonth,
+        private readonly string $holderName,
+        private readonly string $cvv2,
     ) {
     }
 
-    public function getId(): string
+    public function getCardNumber(): string
     {
-        return $this->id;
-    }
-
-    public function getNumber(): string
-    {
-        return $this->number;
+        return $this->cardNumber;
     }
 
     public function getExpirationYear(): string
@@ -32,5 +28,15 @@ final class Card
     public function getExpirationMonth(): string
     {
         return $this->expirationMonth;
+    }
+
+    public function getHolderName(): string
+    {
+        return $this->holderName;
+    }
+
+    public function getCvv2(): string
+    {
+        return $this->cvv2;
     }
 }

@@ -5,7 +5,9 @@ declare(strict_types=1);
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Wipop\Checkout\CheckoutParams;
+use Wipop\Charge\ChargeMethod;
+use Wipop\Charge\ChargeParams;
+use Wipop\Charge\OriginChannel;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
@@ -14,6 +16,7 @@ use Wipop\Examples\ExampleUtils;
 use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
+use Wipop\Utils\Currency;
 
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/exampleUtils.php';
@@ -29,7 +32,7 @@ if ($merchantId === false || $secretKey === false) {
     exit(1);
 }
 
-$logger = new Logger('wipop-checkout-example', [new StreamHandler('php://stdout')]);
+$logger = new Logger('wipop-card-charge-example', [new StreamHandler('php://stdout')]);
 
 $configuration = new ClientConfiguration(
     Environment::SANDBOX,
@@ -38,7 +41,6 @@ $configuration = new ClientConfiguration(
 );
 
 $client = new WipopClient($configuration, $logger);
-
 $customer = new Customer(
     'Ana',
     'García',
@@ -48,28 +50,31 @@ $customer = new Customer(
     phoneNumber: '+34611111111',
     address: null
 );
-
-$checkout = (new CheckoutParams())
-    ->setAmount(49.95)
+$chargeParams = (new ChargeParams())
+    ->setAmount(15.00)
+    ->setMethod(ChargeMethod::CARD)
     ->setProductType(ProductType::PAYMENT_LINK)
-    ->setTerminal(new Terminal(0))
+    ->setOriginChannel(OriginChannel::API)
+    ->setTerminal(new Terminal(1))
     ->setOrderId(OrderId::fromString(ExampleUtils::randomOrderId()))
-    ->setCustomer($customer)
+    ->setDescription('Compra test tarjeta')
     ->setRedirectUrl('https://miweb.com/callback')
-    ->setDescription('Prueba integrador externo QA')
-    ->setSendEmail(true);
+    ->setCurrency(Currency::EUR)
+    ->setCapture(true)
+    ->setCustomer($customer)
+    ->setLanguage('es')
+    ->setSendEmail(false);
 
 try {
-    $response = $client->checkoutOperation()->create($checkout);
+    $response = $client->chargeOperation()->create($chargeParams);
 } catch (Throwable $exception) {
-    $logger->error('Checkout example failed', ['exception' => $exception]);
-    fwrite(STDERR, sprintf("Checkout failed: %s\n", $exception->getMessage()));
+    $logger->error('Card charge example failed', ['exception' => $exception]);
+    fwrite(STDERR, sprintf("Charge failed: %s\n", $exception->getMessage()));
     exit(1);
 }
 
 printf(
-    "Checkout created successfully!\nID: %s\nStatus: %s\nCheckout link: %s\n",
-    $response->getId(),
-    $response->getStatus(),
-    $response->getCheckoutLink()
+    "Card charge created successfully!\nStatus: %s\nTransaction ID: %s\n",
+    $response['status'] ?? 'UNKNOWN',
+    $response['id'] ?? 'N/A'
 );
