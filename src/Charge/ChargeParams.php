@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wipop\Charge;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use Wipop\CardPayment\Card;
 use Wipop\Charge\Payload\CardPayload;
@@ -110,6 +111,11 @@ final class ChargeParams extends RequestBuilder
         return $this->with('post_type', $postType);
     }
 
+    public function dueDate(DateTimeImmutable $dueDate): self
+    {
+        return $this->with('due_date', $dueDate);
+    }
+
     /**
      * Builds the payload as an array ready to jsonify.
      *
@@ -177,6 +183,15 @@ final class ChargeParams extends RequestBuilder
         $card = $parameters['card'] ?? null;
         if ($card instanceof Card) {
             $payload['card'] = CardPayload::fromCard($card);
+        }
+
+        if (isset($parameters['due_date'])) {
+            $dueDate = $parameters['due_date'];
+            if (!$dueDate instanceof DateTimeImmutable) {
+                throw new InvalidArgumentException('Due date must be an instance of DateTimeImmutable.');
+            }
+
+            $payload['due_date'] = $dueDate->format('Y-m-d H:i:s');
         }
 
         return $payload;
