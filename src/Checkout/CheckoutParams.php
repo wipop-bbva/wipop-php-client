@@ -135,7 +135,7 @@ final class CheckoutParams extends RequestBuilder
         if (isset($parameters['expiration_date'])) {
             /** @var DateTimeImmutable $expirationDate */
             $expirationDate = $parameters['expiration_date'];
-            $payload['expiration_date'] = $expirationDate->format('Y-m-d H:i:s');
+            $payload['expiration_date'] = $expirationDate->format('Y-m-d\TH:i:s');
         }
 
         return $payload;
