@@ -34,18 +34,6 @@ final class ChargeOperation extends AbstractOperation
         return $this->hydrate(ChargeResult::class, $data);
     }
 
-    public function confirm(
-        string $transactionId,
-        ConfirmChargeParams $params,
-        ?string $customerId = null
-    ): ChargeResult {
-        $path = $this->buildChargePath($transactionId, '/confirm', $customerId);
-
-        $data = $this->post($path, $params->toArray());
-
-        return $this->hydrate(ChargeResult::class, $data);
-    }
-
     public function confirmPreauthorization(
         string $transactionId,
         CaptureParams $params,
