@@ -13,6 +13,7 @@ use Wipop\Charge\ChargeOperation;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
 use Wipop\Domain\Charge;
+use Wipop\Domain\PaymentMethodType;
 use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\Currency;
 use Wipop\Utils\OrderId;
@@ -57,7 +58,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         $this->assertSame('cust_123', $response->customerId);
         $this->assertNotNull($response->paymentMethod);
         $this->assertSame('https://pay.example/wipop', $response->paymentMethod?->url);
-        $this->assertSame('REDIRECT', $response->paymentMethod?->type?->value);
+        $this->assertSame(PaymentMethodType::REDIRECT, $response->paymentMethod?->type);
         $this->assertSame('card_tok_001', $response->card?->id);
 
         $this->assertRequest(

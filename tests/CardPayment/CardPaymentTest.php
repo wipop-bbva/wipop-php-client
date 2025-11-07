@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Wipop\CardPayment\CardPayment;
+use Wipop\Utils\PaymentMethod;
 use Wipop\Utils\Terminal;
 
 /**
@@ -24,6 +25,6 @@ class CardPaymentTest extends TestCase
             new Terminal(0)
         );
 
-        $this->assertEquals('CARD', $cardPayment->getMethod());
+        $this->assertEquals(PaymentMethod::CARD, $cardPayment->getMethod());
     }
 }

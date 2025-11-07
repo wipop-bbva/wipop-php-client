@@ -275,7 +275,7 @@ class CheckoutOperationTest extends TestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([
             $this->successResponse([
-                'currency' => 'EUR',
+                'currency' => Currency::EUR,
                 'customer_id' => 'cust_123',
                 'extra_key' => 'should_be_ignored',
             ]),

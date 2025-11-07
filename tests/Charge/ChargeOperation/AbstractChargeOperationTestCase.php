@@ -10,10 +10,14 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\Http\GuzzleHttpClient;
+use Wipop\Domain\PaymentMethodType;
+use Wipop\Domain\TransactionStatus;
+use Wipop\Utils\Currency;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -49,11 +53,11 @@ abstract class AbstractChargeOperationTestCase extends TestCase
     protected function successResponse(array $overrides = []): Response
     {
         $payload = [
-            'status' => 'CHARGE_PENDING',
+            'status' => TransactionStatus::CHARGE_PENDING->value,
             'id' => 'txn_123',
             'amount' => '100.50',
-            'currency' => 'EUR',
-            'method' => 'CARD',
+            'currency' => Currency::EUR,
+            'method' => ChargeMethod::CARD,
             'description' => 'Test charge',
             'order_id' => '1234ABCDEFGH',
             'customer_id' => 'cust_123',
@@ -63,7 +67,7 @@ abstract class AbstractChargeOperationTestCase extends TestCase
             'transaction_type' => 'CHARGE',
             'operation_type' => 'IN',
             'terminal' => ['id' => 1],
-            'payment_method' => ['url' => 'https://pay.example/wipop', 'type' => 'REDIRECT'],
+            'payment_method' => ['url' => 'https://pay.example/wipop', 'type' => PaymentMethodType::REDIRECT->value],
             'card' => [
                 'id' => 'card_tok_001',
                 'masked' => '411111******1111',
