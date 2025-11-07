@@ -20,6 +20,7 @@ use const JSON_THROW_ON_ERROR;
 abstract class AbstractChargeOperationTestCase extends TestCase
 {
     protected const MERCHANT_ID = 'm1234567890123456789';
+    protected const ORDER_ID = '1234ABCDEFGH';
 
     protected function createOperationWithMockResponses(array $responses, array &$history): ChargeOperation
     {

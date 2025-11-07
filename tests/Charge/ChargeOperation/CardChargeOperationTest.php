@@ -15,6 +15,7 @@ use Wipop\Charge\OriginChannel;
 use Wipop\Domain\Charge;
 use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\Currency;
+use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
@@ -41,6 +42,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
             ->redirectUrl('https://miapp.com/return')
             ->language('es')
             ->sendEmail(false)
+            ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
         $response = $operation->create($params);
@@ -91,6 +93,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
             ->terminal(new Terminal(1))
             ->currency(Currency::EUR)
             ->description('Direct gateway charge')
+            ->orderId(OrderId::fromString(self::ORDER_ID))
             ->card(new Card(
                 cardNumber: '4111111111111111',
                 expirationYear: '27',

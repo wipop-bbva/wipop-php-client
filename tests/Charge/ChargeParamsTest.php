@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wipop\Tests\Charge;
 
+use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -80,6 +81,7 @@ class ChargeParamsTest extends TestCase
             ->amount(55.5)
             ->method(ChargeMethod::CARD)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString('1234ABCDEFGH'))
             ->customer($customer)
             ->sendEmail(true)
             ->language('es')
@@ -125,6 +127,7 @@ class ChargeParamsTest extends TestCase
             ->terminal(new Terminal(1))
             ->currency(Currency::EUR)
             ->description('Cargo directo en pasarela')
+            ->orderId(OrderId::fromString('1234ABCDEFGH'))
             ->card($card)
         ;
 
@@ -151,6 +154,7 @@ class ChargeParamsTest extends TestCase
             ->productType(ProductType::PAYMENT_LINK)
             ->originChannel(OriginChannel::API)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString('1234ABCDEFGH'))
             ->useCof(true)
             ->description('Tokenize card')
         ;
@@ -171,6 +175,7 @@ class ChargeParamsTest extends TestCase
             ->productType(ProductType::PAYMENT_GATEWAY)
             ->originChannel(OriginChannel::API)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString('1234ABCDEFGH'))
             ->sourceId('card_tok_12345')
             ->useCof(true)
             ->postType(new PostType(PostTypeMode::RECURRENT))
@@ -184,5 +189,24 @@ class ChargeParamsTest extends TestCase
         $this->assertTrue($payload['use_cof']);
         $this->assertSame(['mode' => PostTypeMode::RECURRENT->value], $payload['post_type']);
         $this->assertFalse($payload['capture']);
+    }
+
+    #[Test]
+    public function itFormatsDueDateWhenProvided(): void
+    {
+        $dueDate = new DateTimeImmutable('2025-12-31 23:59:00');
+
+        $payload = (new ChargeParams())
+            ->amount(10.0)
+            ->method(ChargeMethod::CARD)
+            ->productType(ProductType::PAYMENT_LINK)
+            ->originChannel(OriginChannel::API)
+            ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString('1234ABCDEFGH'))
+            ->dueDate($dueDate)
+            ->toArray()
+        ;
+
+        $this->assertSame('2025-12-31 23:59:00', $payload['due_date'] ?? null);
     }
 }

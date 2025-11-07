@@ -14,6 +14,7 @@ use Wipop\Charge\OriginChannel;
 use Wipop\Charge\ReversalParams;
 use Wipop\Domain\Charge;
 use Wipop\Domain\TransactionStatus;
+use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
@@ -42,6 +43,7 @@ final class PreauthChargeOperationTest extends AbstractChargeOperationTestCase
             ->productType(ProductType::PAYMENT_GATEWAY)
             ->originChannel(OriginChannel::API)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
             ->capture(false)
             ->description('Preauthorization example')
         ;

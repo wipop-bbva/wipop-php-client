@@ -13,6 +13,7 @@ use Wipop\Charge\OriginChannel;
 use Wipop\Domain\Charge;
 use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\Currency;
+use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
@@ -39,6 +40,7 @@ final class BizumChargeOperationTest extends AbstractChargeOperationTestCase
             ->redirectUrl('https://miweb.com/callback')
             ->language('es')
             ->sendEmail(false)
+            ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
         $response = $operation->create($params, 'cust_123');

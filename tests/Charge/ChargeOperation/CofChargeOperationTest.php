@@ -14,6 +14,7 @@ use Wipop\Charge\PostType;
 use Wipop\Charge\PostTypeMode;
 use Wipop\Domain\Charge;
 use Wipop\Domain\TransactionStatus;
+use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
@@ -46,6 +47,7 @@ final class CofChargeOperationTest extends AbstractChargeOperationTestCase
             ->productType(ProductType::PAYMENT_LINK)
             ->originChannel(OriginChannel::API)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
             ->useCof(true)
             ->description('Tokenize card via wipop form')
         ;
@@ -62,6 +64,7 @@ final class CofChargeOperationTest extends AbstractChargeOperationTestCase
             ->productType(ProductType::PAYMENT_GATEWAY)
             ->originChannel(OriginChannel::API)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
             ->sourceId($token)
             ->useCof(true)
             ->postType(new PostType(PostTypeMode::RECURRENT))

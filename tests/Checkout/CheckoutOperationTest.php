@@ -142,6 +142,7 @@ class CheckoutOperationTest extends TestCase
                     'phone_number' => '+34611111111',
                 ],
                 'description' => 'Customer checkout',
+                'order_id' => self::ORDER_ID,
             ]
         );
 
@@ -163,6 +164,7 @@ class CheckoutOperationTest extends TestCase
             ->amount(50.0)
             ->productType(ProductType::PAYMENT_GATEWAY)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
         $this->expectException(WipopApiException::class);
@@ -193,6 +195,7 @@ class CheckoutOperationTest extends TestCase
             ->amount(75.0)
             ->productType(ProductType::PAYMENT_GATEWAY)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
         $this->expectException(WipopApiBusinessException::class);
@@ -219,6 +222,7 @@ class CheckoutOperationTest extends TestCase
             ->terminal(new Terminal(1))
             ->sendEmail(true)
             ->capture(true)
+            ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
         $operation->create($params);
@@ -235,6 +239,7 @@ class CheckoutOperationTest extends TestCase
                 'send_email' => true,
                 'capture' => true,
                 'language' => Language::SPANISH,
+                'order_id' => self::ORDER_ID,
             ]
         );
     }
@@ -251,6 +256,7 @@ class CheckoutOperationTest extends TestCase
             ->amount(80.0)
             ->productType(ProductType::PAYMENT_GATEWAY)
             ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
         $this->expectException(WipopApiException::class);
