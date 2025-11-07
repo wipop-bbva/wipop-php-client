@@ -11,6 +11,7 @@ use Wipop\Client\Exception\HttpTransportException;
 use Wipop\Client\Exception\WipopApiException;
 use Wipop\Client\Exception\WipopApiExceptionFactory;
 use Wipop\Client\Http\HttpClientInterface;
+use Wipop\Serializer\Hydrator;
 
 use function is_array;
 use function json_decode;
@@ -21,11 +22,15 @@ use function sprintf;
  */
 abstract class AbstractOperation
 {
+    private Hydrator $hydrator;
+
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly ClientConfiguration $configuration,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        ?Hydrator $hydrator = null,
     ) {
+        $this->hydrator = $hydrator ?? new Hydrator();
     }
 
     protected function getConfiguration(): ClientConfiguration
@@ -36,6 +41,19 @@ abstract class AbstractOperation
     protected function getLogger(): LoggerInterface
     {
         return $this->logger;
+    }
+
+    /**
+     * @template T of object
+     *
+     * @param class-string<T>     $className
+     * @param array<string,mixed> $data
+     *
+     * @return T
+     */
+    protected function hydrate(string $className, array $data): object
+    {
+        return $this->hydrator->hydrate($className, $data);
     }
 
     /**

@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Wipop\Checkout\CheckoutParams;
+use Wipop\Utils\OrderId;
 use Wipop\Utils\Terminal;
 
 /**
@@ -23,13 +24,14 @@ final class CheckoutParamsTest extends TestCase
         $expirationDate = new DateTimeImmutable('2025-10-31T15:05:06');
 
         $payload = (new CheckoutParams())
-            ->setAmount(10.0)
-            ->setTerminal(new Terminal(42))
-            ->setExpirationDate($expirationDate)
+            ->amount(10.0)
+            ->terminal(new Terminal(42))
+            ->orderId(OrderId::fromString('1234ABCDEFGH'))
+            ->expirationDate($expirationDate)
             ->toArray()
         ;
 
         $this->assertArrayHasKey('expiration_date', $payload);
-        $this->assertSame('2025-10-31 15:05:06', $payload['expiration_date']);
+        $this->assertSame('2025-10-31T15:05:06', $payload['expiration_date']);
     }
 }

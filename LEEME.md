@@ -1,40 +1,45 @@
-# Wipop PHP Client
+# Cliente PHP de Wipop
 
-A modern PHP client library for the Wipop payment processing API with full type safety and comprehensive error handling.
+Biblioteca en PHP para integrar la pasarela de pagos Wipop con soporte completo para cargos, checkouts y manejo de errores.
 
-## Features
+## Funcionalidades
 
-- **Card Charge Operations**
-  - Payment link generation
-  - Refunds
-  - Pre-authorization creation
-  - Pre-authorization confirmation
-  - Pre-authorization reversal
-  - Token generation
-  - One-click charges
-  - Recurring charges
-- **Bizum Charge Operations**
-  - Payment link creation
-  - Refunds
-- **Checkout Operations**
-  - Payment link generation
-  - Payment button
+- **Operaciones de cargo con tarjeta**
+  - Generación de links de pago
+  - Devoluciones
+  - Creación de preautorizaciones
+  - Confirmación de preautorizaciones
+  - Anulación de preautorizaciones
+  - Tokenización
+  - Cargos one-click
+  - Cargos recurrentes
+- **Operaciones Bizum**
+  - Creación de links de pago
+  - Devoluciones
+- **Operaciones de Checkout**
+  - Generación de links de pago
+  - Botón de pago
 
-## Requirements
+## Requisitos
 
-- PHP 8.1 or higher
+- PHP 8.1 o superior
 - Composer 2.x
 
-## Installation
+## Instalación
 
-// TODO
+// TODO: subir a repo composer 
 
-## Before Getting Started
-- Have completed the identification process during the Wipöp payment gateway contracting.
-- Access the control panel in test mode (sandbox) from your account.
-- Clearly define which method you will use to perform the integration in your system:
+## Antes de empezar
+- Haber completado la identificación en el proceso de contratación de la pasarela de pago Wipöp.
+- Acceder al panel de control en modo pruebas (sandbox) desde tu cuenta.
+- Definir claramente qué método usarás para realizar la integración en tu sistema:
 
-## Quick Start
+### Credenciales necesarias:
+- Merchant ID
+- API Key secreta
+- Terminal ID (por defecto, 1 en sandbox)
+
+## Inicio rápido
 
 ```php
 use Wipop\Charge\ChargeMethod;
@@ -48,8 +53,8 @@ use Wipop\Utils\Terminal;
 
 $configuration = new ClientConfiguration(
     Environment::SANDBOX,
-    'your-merchant-id',
-    'your-secret-key'
+    'tu-merchant-id',
+    'tu-secret-key'
 );
 
 $client = new WipopClient($configuration);
@@ -58,7 +63,7 @@ $params = (new ChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(100.00)
     ->currency('EUR')
-    ->description('Payment for order #123')
+    ->description('Pago del pedido #123')
     ->productType(ProductType::PAYMENT_LINK)
     ->orderId(OrderId::fromString('1234ABCDEFGH'))
     ->terminal(new Terminal(1));
@@ -66,32 +71,29 @@ $params = (new ChargeParams())
 $charge = $client->chargeOperation()->create($params);
 ```
 
-## Configuration
+## Configuración
 
-### Basic Configuration
+### Configuración básica
 
 ```php
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 
 $config = new ClientConfiguration(
-    Environment::SANDBOX, // Environment::PRODUCTION for live operations
-    'your-merchant-id',
-    'your-secret-key'
+    Environment::SANDBOX, // Environment::PRODUCTION para producción
+    'merchant-id',
+    'secret-key'
 );
 ```
 
-### HTTP Configuration
+### Configuración HTTP
 
 ```php
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\ClientHttpConfiguration;
 use Wipop\Client\Environment;
 
-$httpConfig = new ClientHttpConfiguration(
-    10_000,
-    45_000
-);
+$httpConfig = new ClientHttpConfiguration(10_000, 45_000);
 
 $config = new ClientConfiguration(
     Environment::SANDBOX,
@@ -101,12 +103,12 @@ $config = new ClientConfiguration(
 );
 ```
 
-- `connectionRequestTimeout`: time (ms) to wait for a connection slot (default 5000).
-- `responseTimeout`: time (ms) to wait for a full response (default 30000).
+- `connectionRequestTimeout`: tiempo (ms) que se espera por un slot de conexión (por defecto 5000).
+- `responseTimeout`: tiempo (ms) que se espera por la respuesta completa (por defecto 30000).
 
-## Charge Operations
+## Operaciones de cargo
 
-### Create Card Charge
+### Cargo con tarjeta
 
 ```php
 use Wipop\Charge\ChargeMethod;
@@ -119,7 +121,7 @@ $cardCharge = (new ChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(100.00)
     ->currency('EUR')
-    ->description('Card payment')
+    ->description('Pago con tarjeta')
     ->orderId(OrderId::fromString('1234ABCDEFGH'))
     ->productType(ProductType::PAYMENT_LINK)
     ->terminal(new Terminal(1));
@@ -127,14 +129,14 @@ $cardCharge = (new ChargeParams())
 $response = $client->chargeOperation()->create($cardCharge);
 ```
 
-### Create Bizum Charge
+### Cargo Bizum
 
 ```php
 $bizumCharge = (new ChargeParams())
     ->method(ChargeMethod::BIZUM)
     ->amount(50.00)
     ->currency('EUR')
-    ->description('Bizum payment')
+    ->description('Pago Bizum')
     ->orderId(OrderId::fromString('2345ABCDEFGH'))
     ->productType(ProductType::PAYMENT_LINK)
     ->terminal(new Terminal(1));
@@ -142,7 +144,7 @@ $bizumCharge = (new ChargeParams())
 $response = $client->chargeOperation()->create($bizumCharge, 'customer-id');
 ```
 
-### Confirm / Refund / Reverse / Capture
+### Confirmar / devolver / anular / capturar
 
 ```php
 use Wipop\Charge\CaptureParams;
@@ -159,11 +161,11 @@ $reversal = (new ReversalParams())->reason('PRE_REVERSAL');
 $client->chargeOperation()->reversal('transaction-id', $reversal);
 ```
 
-### Tokenization / One-Click / Recurring / Pre-authorization
+### Tokenización, one-click, recurrentes, preautorizaciones
 
-Use `ChargeParams::useCof(true)` to tokenize, `sourceId()` for one-click charges, `postType()` with `PostTypeMode::RECURRENT` for recurring payments, and `capture(false)` for pre-authorizations.
+Aplica `useCof(true)` para tokenizar, `sourceId()` para cargos one-click, `postType(PostTypeMode::RECURRENT)` para recurrentes y `capture(false)` para preautorizar.
 
-## Checkout Operations
+## Operaciones de checkout
 
 ```php
 use Wipop\Checkout\CheckoutParams;
@@ -171,26 +173,25 @@ use Wipop\Checkout\CheckoutParams;
 $checkoutParams = (new CheckoutParams())
     ->amount(49.90)
     ->currency('EUR')
-    ->description('Checkout example')
+    ->description('Checkout de ejemplo')
     ->orderId(OrderId::fromString('3456ABCDEFGH'))
     ->productType(ProductType::PAYMENT_GATEWAY)
     ->terminal(new Terminal(1))
-    ->redirectUrl('https://your-site.com/success')
+    ->redirectUrl('https://tu-sitio.com/success')
     ->sendEmail(true);
 
 $checkout = $client->checkoutOperation()->create($checkoutParams);
 ```
 
-### Checkout for an Existing Customer
+### Checkout para un cliente existente
 
-If you need to create a checkout for a known customer, pass an instance of `Wipop\Customer\Customer`
-containing the `publicId`. The SDK will automatically call the `/customers/{customerId}/checkouts`
-endpoint.
+Si el cliente ya existe en Wipop, envía una instancia de `Wipop\Customer\Customer` con su `publicId`.
+La librería llamará automáticamente a `/customers/{customerId}/checkouts`.
 
 ```php
 use Wipop\Customer\Customer;
 
-$existingCustomer = new Customer(
+$clienteExistente = new Customer(
     name: 'Ana',
     lastName: 'García',
     email: 'ana@example.com',
@@ -200,16 +201,16 @@ $existingCustomer = new Customer(
 $checkoutParams = (new CheckoutParams())
     ->amount(120.00)
     ->currency('EUR')
-    ->description('Customer checkout')
+    ->description('Checkout para cliente existente')
     ->orderId(OrderId::fromString('9012ABCDEFGH'))
     ->productType(ProductType::PAYMENT_GATEWAY)
     ->terminal(new Terminal(1))
-    ->customer($existingCustomer);
+    ->customer($clienteExistente);
 
 $checkout = $client->checkoutOperation()->create($checkoutParams);
 ```
 
-## Error Handling
+## Manejo de errores
 
 ```php
 use Wipop\Client\Exception\WipopApiException;
@@ -217,21 +218,21 @@ use Wipop\Client\Exception\WipopApiException;
 try {
     $charge = $client->chargeOperation()->create($params);
 } catch (WipopApiException $exception) {
-    // Inspect $exception->getCode()
+    // Maneja el error según código
 }
 ```
 
-## API Reference
+## Referencia de API
 
-- **WipopClient**: entrypoint for API operations.
-- **ClientConfiguration / ClientHttpConfiguration / Environment**: client setup.
-- **ChargeOperation**: create, confirm, refund, reverse, capture charges.
-- **CheckoutOperation**: manage checkout sessions.
-- **ChargeParams / CaptureParams / RefundParams / ReversalParams**: payload builders.
-- **CheckoutParams**: checkout payload builder.
-- **Domain models**: `Charge`, `Checkout`, `Customer`, `Terminal`, `PaymentMethod`, `TransactionStatus`.
+- **WipopClient**: punto de entrada.
+- **ClientConfiguration / ClientHttpConfiguration / Environment**: configuración del cliente.
+- **ChargeOperation**: creación, confirmación, devolución, anulación y captura.
+- **CheckoutOperation**: gestión de sesiones de checkout.
+- **ChargeParams / CaptureParams / RefundParams / ReversalParams**.
+- **CheckoutParams**.
+- **Modelos de dominio**: `Charge`, `Checkout`, `Customer`, `Terminal`, `PaymentMethod`, `TransactionStatus`.
 
 
-## Support
+## Soporte
 
-For support and questions, please contact the support team or [create an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/quickstart) in the project repository.
+Para soporte y preguntas, por favor contacta al equipo de soporta o [crea un issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/quickstart) en el repositorio del proyecto.

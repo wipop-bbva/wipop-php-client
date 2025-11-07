@@ -50,14 +50,14 @@ $customer = new Customer(
 );
 
 $checkout = (new CheckoutParams())
-    ->setAmount(49.95)
-    ->setProductType(ProductType::PAYMENT_LINK)
-    ->setTerminal(new Terminal(0))
-    ->setOrderId(OrderId::fromString(ExampleUtils::randomOrderId()))
-    ->setCustomer($customer)
-    ->setRedirectUrl('https://miweb.com/callback')
-    ->setDescription('Prueba integrador externo QA')
-    ->setSendEmail(true);
+    ->amount(49.95)
+    ->productType(ProductType::PAYMENT_LINK)
+    ->terminal(new Terminal(1))
+    ->orderId(OrderId::fromString(ExampleUtils::randomOrderId()))
+    ->customer($customer)
+    ->redirectUrl('https://miweb.com/callback')
+    ->description('Prueba integrador externo QA')
+    ->sendEmail(true);
 
 try {
     $response = $client->checkoutOperation()->create($checkout);
@@ -69,7 +69,7 @@ try {
 
 printf(
     "Checkout created successfully!\nID: %s\nStatus: %s\nCheckout link: %s\n",
-    $response->getId(),
-    $response->getStatus(),
-    $response->getCheckoutLink()
+    $response->id ?? 'N/A',
+    $response->status ?? 'UNKNOWN',
+    $response->checkoutLink ?? 'N/A'
 );

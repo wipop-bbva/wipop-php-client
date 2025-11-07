@@ -51,19 +51,19 @@ $customer = new Customer(
     address: null
 );
 $chargeParams = (new ChargeParams())
-    ->setAmount(15.00)
-    ->setMethod(ChargeMethod::CARD)
-    ->setProductType(ProductType::PAYMENT_LINK)
-    ->setOriginChannel(OriginChannel::API)
-    ->setTerminal(new Terminal(1))
-    ->setOrderId(OrderId::fromString(ExampleUtils::randomOrderId()))
-    ->setDescription('Compra test tarjeta')
-    ->setRedirectUrl('https://miweb.com/callback')
-    ->setCurrency(Currency::EUR)
-    ->setCapture(true)
-    ->setCustomer($customer)
-    ->setLanguage('es')
-    ->setSendEmail(false);
+    ->amount(15.00)
+    ->method(ChargeMethod::CARD)
+    ->productType(ProductType::PAYMENT_LINK)
+    ->originChannel(OriginChannel::API)
+    ->terminal(new Terminal(1))
+    ->orderId(OrderId::fromString(ExampleUtils::randomOrderId()))
+    ->description('Compra test tarjeta')
+    ->redirectUrl('https://miweb.com/callback')
+    ->currency(Currency::EUR)
+    ->capture(true)
+    ->customer($customer)
+    ->language('es')
+    ->sendEmail(false);
 
 try {
     $response = $client->chargeOperation()->create($chargeParams);
@@ -75,6 +75,6 @@ try {
 
 printf(
     "Card charge created successfully!\nStatus: %s\nTransaction ID: %s\n",
-    $response['status'] ?? 'UNKNOWN',
-    $response['id'] ?? 'N/A'
+    $response->status->value ?? 'UNKNOWN',
+    $response->id ?? 'N/A'
 );

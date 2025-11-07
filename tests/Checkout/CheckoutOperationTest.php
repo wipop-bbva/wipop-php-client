@@ -14,10 +14,8 @@ use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Wipop\Checkout\Checkout;
 use Wipop\Checkout\CheckoutOperation;
 use Wipop\Checkout\CheckoutParams;
-use Wipop\Checkout\CheckoutResponse;
 use Wipop\Checkout\Origin;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
@@ -26,7 +24,7 @@ use Wipop\Client\Exception\WipopApiBusinessException;
 use Wipop\Client\Exception\WipopApiException;
 use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Customer\Customer;
-use Wipop\Customer\NullCustomer;
+use Wipop\Domain\Checkout as CheckoutResult;
 use Wipop\Utils\ChargeStatus;
 use Wipop\Utils\Currency;
 use Wipop\Utils\Language;
@@ -54,14 +52,14 @@ class CheckoutOperationTest extends TestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
-        $checkout = new Checkout(
-            amount: 100.0,
-            productType: ProductType::PAYMENT_GATEWAY,
-            terminal: new Terminal(1),
-            orderId: OrderId::fromString(self::ORDER_ID),
-            redirectUrl: 'https://example.com/redirect',
-            description: 'Test checkout'
-        );
+        $checkout = (new CheckoutParams())
+            ->amount(100.0)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
+            ->redirectUrl('https://example.com/redirect')
+            ->description('Test checkout')
+        ;
 
         $response = $operation->create($checkout);
 
@@ -114,14 +112,14 @@ class CheckoutOperationTest extends TestCase
             ],
         ])], $history);
 
-        $checkout = new Checkout(
-            amount: 150.0,
-            productType: ProductType::PAYMENT_GATEWAY,
-            terminal: new Terminal(1),
-            orderId: OrderId::fromString(self::ORDER_ID),
-            customer: $customer,
-            description: 'Customer checkout'
-        );
+        $checkout = (new CheckoutParams())
+            ->amount(150.0)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
+            ->customer($customer)
+            ->description('Customer checkout')
+        ;
 
         $response = $operation->create($checkout);
 
@@ -144,13 +142,14 @@ class CheckoutOperationTest extends TestCase
                     'phone_number' => '+34611111111',
                 ],
                 'description' => 'Customer checkout',
+                'order_id' => self::ORDER_ID,
             ]
         );
 
-        $this->assertInstanceOf(CheckoutResponse::class, $response);
-        $this->assertSame('ext999', $response->getCustomer()->getPublicId());
-        $this->assertSame('Ana', $response->getCustomer()->getName());
-        $this->assertSame('Customer checkout', $response->getDescription());
+        $this->assertInstanceOf(CheckoutResult::class, $response);
+        $this->assertSame('ext999', $response->customer?->publicId);
+        $this->assertSame('Ana', $response->customer?->name);
+        $this->assertSame('Customer checkout', $response->description);
     }
 
     #[Test]
@@ -161,11 +160,12 @@ class CheckoutOperationTest extends TestCase
             new RequestException('Network error', new Request('POST', 'test')),
         ], $history);
 
-        $checkout = new Checkout(
-            amount: 50.0,
-            productType: ProductType::PAYMENT_GATEWAY,
-            terminal: new Terminal(1)
-        );
+        $checkout = (new CheckoutParams())
+            ->amount(50.0)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
+        ;
 
         $this->expectException(WipopApiException::class);
         $this->expectExceptionMessage('Error calling POST');
@@ -191,11 +191,12 @@ class CheckoutOperationTest extends TestCase
             ]),
         ], $history);
 
-        $checkout = new Checkout(
-            amount: 75.0,
-            productType: ProductType::PAYMENT_GATEWAY,
-            terminal: new Terminal(1)
-        );
+        $checkout = (new CheckoutParams())
+            ->amount(75.0)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
+        ;
 
         $this->expectException(WipopApiBusinessException::class);
         $this->expectExceptionMessage('Business error');
@@ -214,13 +215,14 @@ class CheckoutOperationTest extends TestCase
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
         $params = (new CheckoutParams())
-            ->setAmount(200.0)
-            ->setCurrency(Currency::EUR)
-            ->setProductType(ProductType::PAYMENT_GATEWAY)
-            ->setOrigin(Origin::API)
-            ->setTerminal(new Terminal(1))
-            ->setSendEmail(true)
-            ->setCapture(true)
+            ->amount(200.0)
+            ->currency(Currency::EUR)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->origin(Origin::API)
+            ->terminal(new Terminal(1))
+            ->sendEmail(true)
+            ->capture(true)
+            ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
         $operation->create($params);
@@ -237,6 +239,7 @@ class CheckoutOperationTest extends TestCase
                 'send_email' => true,
                 'capture' => true,
                 'language' => Language::SPANISH,
+                'order_id' => self::ORDER_ID,
             ]
         );
     }
@@ -249,11 +252,12 @@ class CheckoutOperationTest extends TestCase
             new Response(200, ['Content-Type' => 'application/json'], '{invalid_json_no_closure'),
         ], $history);
 
-        $checkout = new Checkout(
-            amount: 80.0,
-            productType: ProductType::PAYMENT_GATEWAY,
-            terminal: new Terminal(1)
-        );
+        $checkout = (new CheckoutParams())
+            ->amount(80.0)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
+        ;
 
         $this->expectException(WipopApiException::class);
         $this->expectExceptionMessage('Error decoding JSON response');
@@ -263,6 +267,31 @@ class CheckoutOperationTest extends TestCase
         } finally {
             $this->assertCount(1, $history);
         }
+    }
+
+    #[Test]
+    public function itIgnoresUnknownFieldsInCheckoutResponse(): void
+    {
+        $history = [];
+        $operation = $this->createOperationWithMockResponses([
+            $this->successResponse([
+                'currency' => Currency::EUR,
+                'customer_id' => 'cust_123',
+                'extra_key' => 'should_be_ignored',
+            ]),
+        ], $history);
+
+        $checkout = (new CheckoutParams())
+            ->amount(120.0)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->terminal(new Terminal(1))
+            ->orderId(OrderId::fromString(self::ORDER_ID))
+        ;
+
+        $response = $operation->create($checkout);
+
+        $this->assertSame(ChargeStatus::AVAILABLE, $response->status);
+        $this->assertSame('123456', $response->id);
     }
 
     private function assertCheckoutRequest(array $history, string $expectedPath, array $expectedPayload): void
@@ -346,19 +375,19 @@ class CheckoutOperationTest extends TestCase
         return new CheckoutOperation($httpClient, $configuration);
     }
 
-    private function assertCheckoutResponse(CheckoutResponse $response, bool $expectsCustomer = true): void
+    private function assertCheckoutResponse(CheckoutResult $response, bool $expectsCustomer = true): void
     {
-        $this->assertSame('123456', $response->getId());
-        $this->assertSame(100.0, $response->getAmount());
-        $this->assertSame('Test checkout', $response->getDescription());
-        $this->assertSame(self::ORDER_ID, $response->getOrderId()->value());
-        $this->assertSame(ChargeStatus::AVAILABLE, $response->getStatus());
-        $this->assertSame('https://checkout.example/123456', $response->getCheckoutLink());
+        $this->assertSame('123456', $response->id);
+        $this->assertSame(100.0, $response->amount);
+        $this->assertSame('Test checkout', $response->description);
+        $this->assertSame(self::ORDER_ID, $response->orderId);
+        $this->assertSame(ChargeStatus::AVAILABLE, $response->status);
+        $this->assertSame('https://checkout.example/123456', $response->checkoutLink);
 
         if ($expectsCustomer) {
-            $this->assertNotInstanceOf(NullCustomer::class, $response->getCustomer());
+            $this->assertNotNull($response->customer);
         } else {
-            $this->assertInstanceOf(NullCustomer::class, $response->getCustomer());
+            $this->assertNull($response->customer);
         }
     }
 }

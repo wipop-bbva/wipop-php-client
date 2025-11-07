@@ -12,7 +12,11 @@ use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
+use Wipop\Domain\Charge;
+use Wipop\Domain\PaymentMethodType;
+use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\Currency;
+use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
@@ -29,19 +33,33 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
         $params = (new ChargeParams())
-            ->setAmount(100.0)
-            ->setMethod(ChargeMethod::CARD)
-            ->setTerminal(new Terminal(1))
-            ->setProductType(ProductType::PAYMENT_LINK)
-            ->setCurrency(Currency::EUR)
-            ->setDescription('Charge via payment link')
-            ->setOriginChannel(OriginChannel::API)
-            ->setRedirectUrl('https://miapp.com/return')
-            ->setLanguage('es')
-            ->setSendEmail(false)
+            ->amount(100.0)
+            ->method(ChargeMethod::CARD)
+            ->terminal(new Terminal(1))
+            ->productType(ProductType::PAYMENT_LINK)
+            ->currency(Currency::EUR)
+            ->description('Charge via payment link')
+            ->originChannel(OriginChannel::API)
+            ->redirectUrl('https://miapp.com/return')
+            ->language('es')
+            ->sendEmail(false)
+            ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
-        $operation->create($params);
+        $response = $operation->create($params);
+        $this->assertInstanceOf(Charge::class, $response);
+        $this->assertSame(TransactionStatus::CHARGE_PENDING, $response->status);
+        $this->assertSame('txn_123', $response->id);
+        $this->assertSame(ChargeMethod::CARD, $response->method);
+        $this->assertSame(100.50, $response->amount);
+        $this->assertSame(Currency::EUR, $response->currency);
+        $this->assertSame('CHARGE', $response->transactionType);
+        $this->assertSame('IN', $response->operationType);
+        $this->assertSame('cust_123', $response->customerId);
+        $this->assertNotNull($response->paymentMethod);
+        $this->assertSame('https://pay.example/wipop', $response->paymentMethod?->url);
+        $this->assertSame(PaymentMethodType::REDIRECT, $response->paymentMethod?->type);
+        $this->assertSame('card_tok_001', $response->card?->id);
 
         $this->assertRequest(
             $history[0]['request'],
@@ -69,14 +87,15 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
         $params = (new ChargeParams())
-            ->setAmount(100.0)
-            ->setMethod(ChargeMethod::CARD)
-            ->setProductType(ProductType::PAYMENT_GATEWAY)
-            ->setOriginChannel(OriginChannel::API)
-            ->setTerminal(new Terminal(1))
-            ->setCurrency(Currency::EUR)
-            ->setDescription('Direct gateway charge')
-            ->setCard(new Card(
+            ->amount(100.0)
+            ->method(ChargeMethod::CARD)
+            ->productType(ProductType::PAYMENT_GATEWAY)
+            ->originChannel(OriginChannel::API)
+            ->terminal(new Terminal(1))
+            ->currency(Currency::EUR)
+            ->description('Direct gateway charge')
+            ->orderId(OrderId::fromString(self::ORDER_ID))
+            ->card(new Card(
                 cardNumber: '4111111111111111',
                 expirationYear: '27',
                 expirationMonth: '12',
@@ -85,7 +104,9 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
             ))
         ;
 
-        $operation->create($params);
+        $response = $operation->create($params);
+        $this->assertInstanceOf(Charge::class, $response);
+        $this->assertSame(TransactionStatus::CHARGE_PENDING, $response->status);
 
         $payload = $this->decodeRequestBody($history[0]['request']);
 
@@ -106,7 +127,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
-        $params = (new ChargeParams())->setAmount(10.0);
+        $params = (new ChargeParams())->amount(10.0);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Charge terminal is required.');

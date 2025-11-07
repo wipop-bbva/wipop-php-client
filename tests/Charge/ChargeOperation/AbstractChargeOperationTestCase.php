@@ -10,16 +10,21 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\Http\GuzzleHttpClient;
+use Wipop\Domain\PaymentMethodType;
+use Wipop\Domain\TransactionStatus;
+use Wipop\Utils\Currency;
 
 use const JSON_THROW_ON_ERROR;
 
 abstract class AbstractChargeOperationTestCase extends TestCase
 {
     protected const MERCHANT_ID = 'm1234567890123456789';
+    protected const ORDER_ID = '1234ABCDEFGH';
 
     protected function createOperationWithMockResponses(array $responses, array &$history): ChargeOperation
     {
@@ -45,12 +50,48 @@ abstract class AbstractChargeOperationTestCase extends TestCase
         return new ChargeOperation($httpClient, $configuration);
     }
 
-    protected function successResponse(): Response
+    protected function successResponse(array $overrides = []): Response
     {
+        $payload = [
+            'status' => TransactionStatus::CHARGE_PENDING->value,
+            'id' => 'txn_123',
+            'amount' => '100.50',
+            'currency' => Currency::EUR,
+            'method' => ChargeMethod::CARD,
+            'description' => 'Test charge',
+            'order_id' => '1234ABCDEFGH',
+            'customer_id' => 'cust_123',
+            'customer' => ['public_id' => 'cust_123', 'email' => 'ana@example.com'],
+            'creation_date' => '2025-01-01T10:00:00+00:00',
+            'operation_date' => '2025-01-01T10:05:00+00:00',
+            'transaction_type' => 'CHARGE',
+            'operation_type' => 'IN',
+            'terminal' => ['id' => 1],
+            'payment_method' => ['url' => 'https://pay.example/wipop', 'type' => PaymentMethodType::REDIRECT->value],
+            'card' => [
+                'id' => 'card_tok_001',
+                'masked' => '411111******1111',
+                'last_digits' => '1111',
+                'expiration_month' => '12',
+                'expiration_year' => '27',
+            ],
+            'authorization' => 'AUTH123',
+            'use_cof' => false,
+            'refund' => null,
+            'metadata' => ['key' => 'value'],
+            'error_code' => '123',
+            'error_message' => null,
+            'ignored_field' => 'extra',
+        ];
+
+        if ($overrides !== []) {
+            $payload = array_replace_recursive($payload, $overrides);
+        }
+
         return new Response(
             200,
             ['Content-Type' => 'application/json'],
-            '{"status":"SUCCESS"}'
+            json_encode($payload, JSON_THROW_ON_ERROR)
         );
     }
 

@@ -15,6 +15,7 @@ use function array_merge;
 use function base64_encode;
 use function is_array;
 use function sprintf;
+use function str_ends_with;
 
 final class GuzzleHttpClient implements HttpClientInterface
 {
@@ -25,6 +26,12 @@ final class GuzzleHttpClient implements HttpClientInterface
      */
     public function __construct(ClientConfiguration $configuration, array $options = [])
     {
+        $secretKey = $configuration->getSecretKey();
+
+        if (!str_ends_with($secretKey, ':')) {
+            $secretKey .= ':';
+        }
+
         $defaultOptions = [
             'base_uri' => $configuration->getApiUrl(),
             'timeout' => $configuration->getHttpConfiguration()->getResponseTimeout() / 1000,
@@ -33,7 +40,7 @@ final class GuzzleHttpClient implements HttpClientInterface
                 'Content-Type' => 'application/json',
                 'Authorization' => sprintf(
                     'Basic %s',
-                    base64_encode($configuration->getSecretKey())
+                    base64_encode($secretKey)
                 ),
             ],
         ];

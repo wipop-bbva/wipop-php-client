@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wipop\Charge;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use Wipop\CardPayment\Card;
 use Wipop\Charge\Payload\CardPayload;
@@ -25,89 +26,94 @@ use function sprintf;
  */
 final class ChargeParams extends RequestBuilder
 {
-    public function setAmount(float $amount): self
+    public function amount(float $amount): self
     {
         return $this->with('amount', $amount);
     }
 
-    public function setMethod(string $method): self
+    public function method(string $method): self
     {
         return $this->with('method', $method);
     }
 
-    public function setDescription(string $description): self
+    public function description(string $description): self
     {
         return $this->with('description', $description);
     }
 
-    public function setSendEmail(bool $sendEmail): self
+    public function sendEmail(bool $sendEmail): self
     {
         return $this->with('send_email', $sendEmail);
     }
 
-    public function setCurrency(string $currency): self
+    public function currency(string $currency): self
     {
         return $this->with('currency', $currency);
     }
 
-    public function setOriginChannel(string $originChannel): self
+    public function originChannel(string $originChannel): self
     {
         return $this->with('origin_channel', $originChannel);
     }
 
-    public function setProductType(string $productType): self
+    public function productType(string $productType): self
     {
         return $this->with('product_type', $productType);
     }
 
-    public function setTerminal(Terminal $terminal): self
+    public function terminal(Terminal $terminal): self
     {
         return $this->with('terminal', $terminal);
     }
 
-    public function setRedirectUrl(string $redirectUrl): self
+    public function redirectUrl(string $redirectUrl): self
     {
         return $this->with('redirect_url', $redirectUrl);
     }
 
-    public function setOrderId(OrderId $orderId): self
+    public function orderId(OrderId $orderId): self
     {
         return $this->with('order_id', $orderId);
     }
 
-    public function setCustomer(?Customer $customer): self
+    public function customer(?Customer $customer): self
     {
         return $this->with('customer', $customer);
     }
 
-    public function setCapture(bool $capture): self
+    public function capture(bool $capture): self
     {
         return $this->with('capture', $capture);
     }
 
-    public function setLanguage(string $language): self
+    public function language(string $language): self
     {
         return $this->with('language', $language);
     }
 
-    public function setCard(Card $card): self
+    public function card(Card $card): self
     {
         return $this->with('card', $card);
     }
 
-    public function setSourceId(string $sourceId): self
+    public function sourceId(string $sourceId): self
     {
         return $this->with('source_id', $sourceId);
     }
 
-    public function setUseCof(bool $useCof): self
+    public function useCof(bool $useCof): self
     {
         return $this->with('use_cof', $useCof);
     }
 
-    public function setPostType(PostType $postType): self
+    public function postType(PostType $postType): self
     {
         return $this->with('post_type', $postType);
+    }
+
+    public function dueDate(DateTimeImmutable $dueDate): self
+    {
+        return $this->with('due_date', $dueDate);
     }
 
     /**
@@ -177,6 +183,15 @@ final class ChargeParams extends RequestBuilder
         $card = $parameters['card'] ?? null;
         if ($card instanceof Card) {
             $payload['card'] = CardPayload::fromCard($card);
+        }
+
+        if (isset($parameters['due_date'])) {
+            $dueDate = $parameters['due_date'];
+            if (!$dueDate instanceof DateTimeImmutable) {
+                throw new InvalidArgumentException('Due date must be an instance of DateTimeImmutable.');
+            }
+
+            $payload['due_date'] = $dueDate->format('Y-m-d H:i:s');
         }
 
         return $payload;

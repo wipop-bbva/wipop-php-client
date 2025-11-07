@@ -48,19 +48,19 @@ $customer = new Customer(
 );
 
 $chargeParams = (new ChargeParams())
-    ->setAmount(15.00)
-    ->setMethod(ChargeMethod::BIZUM)
-    ->setProductType(ProductType::PAYMENT_LINK)
-    ->setOriginChannel(OriginChannel::API)
-    ->setTerminal(new Terminal(1))
-    ->setOrderId(OrderId::fromString(ExampleUtils::randomOrderId()))
-    ->setDescription('Compra test Bizum')
-    ->setRedirectUrl('https://miweb.com/callback')
-    ->setCurrency('EUR')
-    ->setCapture(true)
-    ->setCustomer($customer)
-    ->setLanguage('es')
-    ->setSendEmail(false);
+    ->amount(15.00)
+    ->method(ChargeMethod::BIZUM)
+    ->productType(ProductType::PAYMENT_LINK)
+    ->originChannel(OriginChannel::API)
+    ->terminal(new Terminal(1))
+    ->orderId(OrderId::fromString(ExampleUtils::randomOrderId()))
+    ->description('Compra test Bizum')
+    ->redirectUrl('https://miweb.com/callback')
+    ->currency('EUR')
+    ->capture(true)
+    ->customer($customer)
+    ->language('es')
+    ->sendEmail(false);
 
 try {
     $response = $client->chargeOperation()->create($chargeParams);
@@ -72,6 +72,6 @@ try {
 
 printf(
     "Bizum charge created!\nStatus: %s\nTransaction ID: %s\n",
-    $response['status'] ?? 'UNKNOWN',
-    $response['id'] ?? 'N/A'
+    $response->status->value ?? 'UNKNOWN',
+    $response->id ?? 'N/A'
 );
