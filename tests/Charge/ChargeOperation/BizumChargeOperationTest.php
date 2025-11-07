@@ -10,7 +10,7 @@ use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
-use Wipop\Domain\Charge as ChargeResult;
+use Wipop\Domain\Charge;
 use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\Currency;
 use Wipop\Utils\ProductType;
@@ -42,7 +42,7 @@ final class BizumChargeOperationTest extends AbstractChargeOperationTestCase
         ;
 
         $response = $operation->create($params, 'cust_123');
-        $this->assertInstanceOf(ChargeResult::class, $response);
+        $this->assertInstanceOf(Charge::class, $response);
         $this->assertSame(TransactionStatus::CHARGE_PENDING, $response->status);
 
         $this->assertRequest(

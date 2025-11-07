@@ -12,7 +12,7 @@ use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
 use Wipop\Charge\PostType;
 use Wipop\Charge\PostTypeMode;
-use Wipop\Domain\Charge as ChargeResult;
+use Wipop\Domain\Charge;
 use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
@@ -29,7 +29,10 @@ final class CofChargeOperationTest extends AbstractChargeOperationTestCase
         $history = [];
         $token = 'card_token_6789';
         $operation = $this->createOperationWithMockResponses([
-            $this->successResponse(['use_cof' => false]),
+            $this->successResponse([
+                'use_cof' => false,
+                'card' => ['id' => $token],
+            ]),
             $this->successResponse([
                 'status' => 'COMPLETED',
                 'use_cof' => true,
@@ -48,7 +51,7 @@ final class CofChargeOperationTest extends AbstractChargeOperationTestCase
         ;
 
         $response = $operation->create($tokenizationParams);
-        $this->assertInstanceOf(ChargeResult::class, $response);
+        $this->assertInstanceOf(Charge::class, $response);
         $this->assertSame(TransactionStatus::CHARGE_PENDING, $response->status);
         $this->assertFalse($response->useCof);
         $this->assertSame('card_token_6789', $response->card?->id);
@@ -67,7 +70,7 @@ final class CofChargeOperationTest extends AbstractChargeOperationTestCase
         ;
 
         $secondResponse = $operation->create($gatewayParams);
-        $this->assertInstanceOf(ChargeResult::class, $secondResponse);
+        $this->assertInstanceOf(Charge::class, $secondResponse);
         $this->assertSame(TransactionStatus::COMPLETED, $secondResponse->status);
         $this->assertSame($token, $secondResponse->card?->id);
 

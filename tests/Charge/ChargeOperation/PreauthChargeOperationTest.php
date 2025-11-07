@@ -12,7 +12,7 @@ use Wipop\Charge\ChargeOperation;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
 use Wipop\Charge\ReversalParams;
-use Wipop\Domain\Charge as ChargeResult;
+use Wipop\Domain\Charge;
 use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
@@ -56,14 +56,14 @@ final class PreauthChargeOperationTest extends AbstractChargeOperationTestCase
 
         $reversalResponse = $operation->reversePreauthorization('txn_123', $reversalParams);
 
-        $this->assertInstanceOf(ChargeResult::class, $createResponse);
+        $this->assertInstanceOf(Charge::class, $createResponse);
         $this->assertSame(TransactionStatus::IN_PROGRESS, $createResponse->status);
         $this->assertNull($createResponse->paymentMethod);
 
-        $this->assertInstanceOf(ChargeResult::class, $confirmResponse);
+        $this->assertInstanceOf(Charge::class, $confirmResponse);
         $this->assertSame(TransactionStatus::COMPLETED, $confirmResponse->status);
 
-        $this->assertInstanceOf(ChargeResult::class, $reversalResponse);
+        $this->assertInstanceOf(Charge::class, $reversalResponse);
         $this->assertSame(TransactionStatus::FAILED, $reversalResponse->status);
 
         $firstPayload = $this->decodeRequestBody($history[0]['request']);

@@ -12,7 +12,7 @@ use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeOperation;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
-use Wipop\Domain\Charge as ChargeResult;
+use Wipop\Domain\Charge;
 use Wipop\Domain\TransactionStatus;
 use Wipop\Utils\Currency;
 use Wipop\Utils\ProductType;
@@ -44,7 +44,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         ;
 
         $response = $operation->create($params);
-        $this->assertInstanceOf(ChargeResult::class, $response);
+        $this->assertInstanceOf(Charge::class, $response);
         $this->assertSame(TransactionStatus::CHARGE_PENDING, $response->status);
         $this->assertSame('txn_123', $response->id);
         $this->assertSame(ChargeMethod::CARD, $response->method);
@@ -101,7 +101,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         ;
 
         $response = $operation->create($params);
-        $this->assertInstanceOf(ChargeResult::class, $response);
+        $this->assertInstanceOf(Charge::class, $response);
         $this->assertSame(TransactionStatus::CHARGE_PENDING, $response->status);
 
         $payload = $this->decodeRequestBody($history[0]['request']);
