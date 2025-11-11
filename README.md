@@ -19,6 +19,8 @@ A modern PHP client library for the Wipop payment processing API with full type 
 - **Checkout Operations**
   - Payment link generation
   - Payment button
+- **Merchant Operations**
+  - Payment method discovery per terminal
 
 ## Requirements
 
@@ -163,6 +165,43 @@ $client->chargeOperation()->reversal('transaction-id', $reversal);
 
 Use `ChargeParams::useCof(true)` to tokenize, `sourceId()` for one-click charges, `postType()` with `PostTypeMode::RECURRENT` for recurring payments, and `capture(false)` for pre-authorizations.
 
+### Recurring Payments
+
+Recurring billing is achieved with the regular `chargeOperation()->create()` flow. Configure the
+payload to flag the transaction as recurring and, after the first successful charge, reuse the
+generated source identifier.
+
+```php
+use Wipop\Charge\ChargeMethod;
+use Wipop\Charge\ChargeParams;
+use Wipop\Charge\PostType;
+use Wipop\Charge\PostTypeMode;
+use Wipop\Utils\Terminal;
+
+// First charge: tokenize cardholder for future cycles
+$initialCharge = (new ChargeParams())
+    ->method(ChargeMethod::CARD)
+    ->amount(29.99)
+    ->useCof(true)
+    ->postType(new PostType(PostTypeMode::RECURRENT))
+    ->capture(true)
+    ->redirectUrl('https://myweb.test/return')
+    ->terminal(new Terminal(1));
+
+$initialResponse = $client->chargeOperation()->create($initialCharge);
+$sourceId = $initialResponse->card?->id; // persist for later cycles
+
+// Subsequent cycles: reuse the stored sourceId
+$recurringCharge = (new ChargeParams())
+    ->method(ChargeMethod::CARD)
+    ->amount(29.99)
+    ->sourceId($sourceId)
+    ->postType(new PostType(PostTypeMode::RECURRENT))
+    ->terminal(new Terminal(1));
+
+$client->chargeOperation()->create($recurringCharge);
+```
+
 ## Checkout Operations
 
 ```php
@@ -209,6 +248,21 @@ $checkoutParams = (new CheckoutParams())
 $checkout = $client->checkoutOperation()->create($checkoutParams);
 ```
 
+## Merchant Operations
+
+Retrieve the payment methods enabled for a merchant/terminal combination. 
+
+```php
+use Wipop\Utils\ProductType;
+use Wipop\Utils\Terminal;
+
+$methods = $client
+    ->merchantOperation()
+    ->listPaymentMethods(ProductType::PAYMENT_GATEWAY, new Terminal(1));
+
+// ['CARD', 'BIZUM', 'GOOGLE_PAY']
+```
+
 ## Error Handling
 
 ```php
@@ -227,6 +281,7 @@ try {
 - **ClientConfiguration / ClientHttpConfiguration / Environment**: client setup.
 - **ChargeOperation**: create, confirm, refund, reverse, capture charges.
 - **CheckoutOperation**: manage checkout sessions.
+- **MerchantOperation**: inspect merchant metadata such as enabled payment methods.
 - **ChargeParams / CaptureParams / RefundParams / ReversalParams**: payload builders.
 - **CheckoutParams**: checkout payload builder.
 - **Domain models**: `Charge`, `Checkout`, `Customer`, `Terminal`, `PaymentMethod`, `TransactionStatus`.
