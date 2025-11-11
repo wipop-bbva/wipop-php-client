@@ -68,6 +68,15 @@ $params = (new ChargeParams())
 $charge = $client->chargeOperation()->create($params);
 ```
 
+## Example Scripts
+
+Runnable CLI samples live under `docs/examples`. Each script loads credentials from `.env` and can be
+executed with `php docs/examples/<script>.php`.
+
+- `card-charge.php` / `bizum-charge.php`: create payment links for card or Bizum.
+- `checkout.php` / `checkoutCustomer.php`: start a checkout session for anonymous or known customers.
+- `preauth-confirm.php` / `preauth-cancel.php`: walk through the preauthorization flow.
+- `payment-methods.php`: inspect the payment methods configured for your merchant.
 ## Configuration
 
 ### Basic Configuration

@@ -5,10 +5,10 @@ declare(strict_types=1);
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Wipop\Charge\CaptureParams;
 use Wipop\Charge\ChargeMethod;
 use Wipop\Charge\ChargeParams;
 use Wipop\Charge\OriginChannel;
+use Wipop\Charge\ReversalParams;
 use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
@@ -19,10 +19,10 @@ use Wipop\Utils\OrderId;
 use Wipop\Utils\ProductType;
 use Wipop\Utils\Terminal;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/exampleUtils.php';
 
-$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../..');
 $dotenv->load();
 
 $merchantId = $_ENV['WIPOP_MERCHANT_ID'] ?? null;
@@ -33,7 +33,7 @@ if ($merchantId === false || $secretKey === false) {
     exit(1);
 }
 
-$logger = new Logger('wipop-preauth-confirm-example', [new StreamHandler('php://stdout')]);
+$logger = new Logger('wipop-preauth-cancel-example', [new StreamHandler('php://stdout')]);
 
 $configuration = new ClientConfiguration(
     Environment::SANDBOX,
@@ -53,7 +53,7 @@ $preauthParams = (new ChargeParams())
     ->amount(30.0)
     ->method(ChargeMethod::CARD)
     ->currency(Currency::EUR)
-    ->description('Preautorización de prueba')
+    ->description('Preautorización a anular')
     ->orderId(OrderId::fromString(ExampleUtils::randomOrderId()))
     ->productType(ProductType::PAYMENT_LINK)
     ->originChannel(OriginChannel::API)
@@ -80,19 +80,19 @@ if ($transactionId === null || $transactionId === '') {
     exit(1);
 }
 
-$captureParams = (new CaptureParams())
-    ->amount(30.0);
+$reversalParams = (new ReversalParams())
+    ->reason('PRE_REVERSAL');
 
 try {
-    $captureResponse = $client->chargeOperation()->capture($transactionId, $captureParams);
+    $reversalResponse = $client->chargeOperation()->reversal($transactionId, $reversalParams);
 } catch (Throwable $exception) {
-    $logger->error('Preauth capture failed', ['exception' => $exception]);
-    fwrite(STDERR, sprintf("Capture failed: %s\n", $exception->getMessage()));
+    $logger->error('Reversal of preauthorization failed', ['exception' => $exception]);
+    fwrite(STDERR, sprintf("Reversal failed: %s\n", $exception->getMessage()));
     exit(1);
 }
 
 printf(
-    "Preauth confirmed!\nID: %s\nFinal status: %s\n",
-    $captureResponse->id ?? $transactionId,
-    $captureResponse->status->value ?? 'UNKNOWN'
+    "Preauth reversed!\nID: %s\nFInal state: %s\n",
+    $reversalResponse->id ?? $transactionId,
+    $reversalResponse->status->value ?? 'UNKNOWN'
 );
