@@ -57,12 +57,26 @@ abstract class AbstractOperation
     }
 
     /**
+     * Sends a GET request and returns the decoded JSON response.
+     *
+     * @param array<string, mixed> $query
+     *
+     * @return array<int|string, mixed>
+     */
+    protected function get(string $path, array $query = []): array
+    {
+        $options = $this->buildOptions([], $query);
+
+        return $this->request('GET', $path, $options);
+    }
+
+    /**
      * It sends a POST request and returns the decoded JSON body.
      *
      * @param array<string, mixed> $payload
      * @param array<string, mixed> $query
      *
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      */
     protected function post(string $path, array $payload = [], array $query = []): array
     {
@@ -95,7 +109,7 @@ abstract class AbstractOperation
     /**
      * @param array<string, mixed> $options
      *
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      */
     private function request(string $method, string $path, array $options): array
     {

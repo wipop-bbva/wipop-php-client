@@ -16,6 +16,7 @@ use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Client\WipopClient;
+use Wipop\Merchant\MerchantOperation;
 
 use function is_array;
 
@@ -63,6 +64,7 @@ class WipopClientTest extends TestCase
 
         $this->assertSame($configuration, $client->getConfiguration());
         $this->assertInstanceOf(CheckoutOperation::class, $client->checkoutOperation());
+        $this->assertInstanceOf(MerchantOperation::class, $client->merchantOperation());
     }
 
     private function extractHttpClient(WipopClient $client): GuzzleHttpClient
