@@ -19,6 +19,8 @@ Biblioteca en PHP para integrar la pasarela de pagos Wipop con soporte completo 
 - **Operaciones de Checkout**
   - Generación de links de pago
   - Botón de pago
+- **Operaciones de merchant**
+  - Consulta de métodos de pago por terminal
 
 ## Requisitos
 
@@ -71,6 +73,15 @@ $params = (new ChargeParams())
 $charge = $client->chargeOperation()->create($params);
 ```
 
+## Scripts de ejemplo
+
+Los ejemplos ejecutables se encuentran en `docs/examples` y leen credenciales desde `.env`. Puedes
+lanzarlos con `php docs/examples/<script>.php`.
+
+- `card-charge.php` / `bizum-charge.php`: generán cargos/link de pago para tarjeta o Bizum.
+- `checkout.php` / `checkoutCustomer.php`: crean checkouts para clientes anónimos o registrados.
+- `preauth-confirm.php` / `preauth-cancel.php`: muestran el flujo de preautorizaciones.
+- `payment-methods.php`: consulta los métodos de pago activos para tu comercio.
 ## Configuración
 
 ### Configuración básica
@@ -165,6 +176,42 @@ $client->chargeOperation()->reversal('transaction-id', $reversal);
 
 Aplica `useCof(true)` para tokenizar, `sourceId()` para cargos one-click, `postType(PostTypeMode::RECURRENT)` para recurrentes y `capture(false)` para preautorizar.
 
+### Pagos recurrentes
+
+Para crear pagos recurrentes basta con construir el payload de `chargeOperation()->create()` para marcar la operación como recurrente y, tras el primer cobro exitoso, reutilizar el identificador de
+fuente (sourceId) que devuelve la API.
+
+```php
+use Wipop\Charge\ChargeMethod;
+use Wipop\Charge\ChargeParams;
+use Wipop\Charge\PostType;
+use Wipop\Charge\PostTypeMode;
+use Wipop\Utils\Terminal;
+
+// Primer cargo: se tokeniza el medio de pago
+$primerCargo = (new ChargeParams())
+    ->method(ChargeMethod::CARD)
+    ->amount(29.99)
+    ->useCof(true)
+    ->postType(new PostType(PostTypeMode::RECURRENT))
+    ->capture(true)
+    ->redirectUrl('https://miweb.test/return')
+    ->terminal(new Terminal(1));
+
+$respuestaInicial = $client->chargeOperation()->create($primerCargo);
+$sourceId = $respuestaInicial->card?->id; // persiste para los siguientes ciclos
+
+// Ciclos siguientes: se reutiliza el sourceId almacenado
+$cargoRecurrente = (new ChargeParams())
+    ->method(ChargeMethod::CARD)
+    ->amount(29.99)
+    ->sourceId($sourceId)
+    ->postType(new PostType(PostTypeMode::RECURRENT))
+    ->terminal(new Terminal(1));
+
+$client->chargeOperation()->create($cargoRecurrente);
+```
+
 ## Operaciones de checkout
 
 ```php
@@ -210,6 +257,21 @@ $checkoutParams = (new CheckoutParams())
 $checkout = $client->checkoutOperation()->create($checkoutParams);
 ```
 
+## Operaciones de merchant
+
+Consulta los métodos de pago habilitados para un merchant y terminal concretos.
+
+```php
+use Wipop\Utils\ProductType;
+use Wipop\Utils\Terminal;
+
+$metodos = $client
+    ->merchantOperation()
+    ->listPaymentMethods(ProductType::PAYMENT_GATEWAY, new Terminal(1));
+
+// ['CARD', 'BIZUM', 'GOOGLE_PAY']
+```
+
 ## Manejo de errores
 
 ```php
@@ -228,6 +290,7 @@ try {
 - **ClientConfiguration / ClientHttpConfiguration / Environment**: configuración del cliente.
 - **ChargeOperation**: creación, confirmación, devolución, anulación y captura.
 - **CheckoutOperation**: gestión de sesiones de checkout.
+- **MerchantOperation**: consulta de metadatos del comercio (métodos de pago habilitados).
 - **ChargeParams / CaptureParams / RefundParams / ReversalParams**.
 - **CheckoutParams**.
 - **Modelos de dominio**: `Charge`, `Checkout`, `Customer`, `Terminal`, `PaymentMethod`, `TransactionStatus`.

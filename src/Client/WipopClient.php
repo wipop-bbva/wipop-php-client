@@ -10,11 +10,13 @@ use Wipop\Charge\ChargeOperation;
 use Wipop\Checkout\CheckoutOperation;
 use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Client\Http\HttpClientInterface;
+use Wipop\Merchant\MerchantOperation;
 
 final class WipopClient
 {
     private readonly CheckoutOperation $checkoutOperation;
     private readonly ChargeOperation $chargeOperation;
+    private readonly MerchantOperation $merchantOperation;
     private readonly ClientConfiguration $configuration;
     private readonly HttpClientInterface $httpClient;
     private readonly LoggerInterface $logger;
@@ -39,6 +41,12 @@ final class WipopClient
             $this->configuration,
             $this->logger
         );
+
+        $this->merchantOperation = new MerchantOperation(
+            $this->httpClient,
+            $this->configuration,
+            $this->logger
+        );
     }
 
     public function getConfiguration(): ClientConfiguration
@@ -54,5 +62,10 @@ final class WipopClient
     public function chargeOperation(): ChargeOperation
     {
         return $this->chargeOperation;
+    }
+
+    public function merchantOperation(): MerchantOperation
+    {
+        return $this->merchantOperation;
     }
 }

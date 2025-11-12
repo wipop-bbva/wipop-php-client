@@ -13,4 +13,5 @@ parameters:
           paths:
               - tests/Checkout/CheckoutOperationTest.php
               - tests/Charge/ChargeOperation/**.php
+              - tests/Merchant/MerchantOperationTest.php
 
