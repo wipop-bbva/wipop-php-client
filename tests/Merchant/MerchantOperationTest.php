@@ -52,7 +52,7 @@ final class MerchantOperationTest extends TestCase
 
         $request = $history[0]['request'];
         $this->assertSame('GET', $request->getMethod());
-        $this->assertSame('/v1/' . self::MERCHANT_ID . '/payment_methods', $request->getUri()->getPath());
+        $this->assertSame('/m/v1/' . self::MERCHANT_ID . '/payment_methods', $request->getUri()->getPath());
     }
 
     /**

@@ -37,7 +37,7 @@ final class MerchantOperation extends AbstractOperation
         $merchantId = $this->getConfiguration()->getMerchantId();
 
         $response = $this->get(
-            sprintf('/v1/%s/payment_methods', $merchantId),
+            sprintf('/m/v1/%s/payment_methods', $merchantId),
             [
                 'product_type' => $productType,
                 'terminal' => $terminal->getId(),

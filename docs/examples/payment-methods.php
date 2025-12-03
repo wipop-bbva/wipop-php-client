@@ -38,7 +38,7 @@ $client = new WipopClient($configuration, $logger);
 try {
     $methods = $client
         ->merchantOperation()
-        ->listPaymentMethods(ProductType::PAYMENT_GATEWAY, new Terminal(1));
+        ->listPaymentMethods(ProductType::PASARELA_PAGO, new Terminal(1));
 } catch (Throwable $exception) {
     $logger->error('Unable to fetch payment methods', ['exception' => $exception]);
     fwrite(STDERR, sprintf("Fetch failed: %s\n", $exception->getMessage()));
