@@ -40,7 +40,7 @@ try {
         ->merchantOperation()
         ->listPaymentMethods(ProductType::PASARELA_PAGO, new Terminal(1));
 } catch (Throwable $exception) {
-    $logger->error('Unable to fetch payment methods', ['exception' => $exception]);
+    $logger->error('Unable to fetch payment methods ' . $exception->getMessage(), ['exception' => $exception]);
     fwrite(STDERR, sprintf("Fetch failed: %s\n", $exception->getMessage()));
     exit(1);
 }
