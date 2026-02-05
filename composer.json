@@ -1,7 +1,6 @@
 {
-  "name": "wipop/wipop-payment",
+  "name": "wipop-bbva/wipop-php-client",
   "type": "library",
-  "version": "1.0.0",
   "description": "A PHP library for integrating Wipop payment gateway.",
   "license": "MIT",
   "autoload": {
