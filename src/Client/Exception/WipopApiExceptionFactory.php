@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Wipop\Client\Exception;
 
 use Throwable;
+use Wipop\Exception\WipopException;
 
 final class WipopApiExceptionFactory
 {
     /**
      * @param array<string, mixed> $payload
      */
-    public static function fromPayload(array $payload, ?Throwable $previous = null): WipopApiException
+    public static function fromPayload(array $payload, ?Throwable $previous = null): WipopException
     {
         $responseCode = isset($payload['response_code']) && is_array($payload['response_code'])
             ? $payload['response_code']
@@ -33,7 +34,7 @@ final class WipopApiExceptionFactory
         ?string $code,
         ?string $message = null,
         ?Throwable $previous = null
-    ): WipopApiException {
+    ): WipopException {
         return match ($code) {
             ApiErrorCode::AC000 => new WipopApiUnexpectedException($message, $previous),
             ApiErrorCode::BC000 => new WipopApiBusinessException($message, $previous),
@@ -44,7 +45,7 @@ final class WipopApiExceptionFactory
             ApiErrorCode::BC0007 => new WipopApiUnauthorizedException($message, $previous),
             ApiErrorCode::BC0009 => new WipopApiRetryLaterException($message, $previous),
             ApiErrorCode::BC0013 => new WipopApiTimeoutException($message, $previous),
-            default => new WipopApiException($message ?? 'Unknown API error', $code, $previous),
+            default => new WipopException($message ?? 'Unknown API error', $code, $previous),
         };
     }
 }

@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Wipop\Client\Exception;
 
 use Throwable;
+use Wipop\Exception\WipopException;
 
-final class WipopApiInvalidRequestException extends WipopApiException
+final class WipopApiInvalidRequestException extends WipopException
 {
     public const DEFAULT_MESSAGE = 'The operation could not be completed. Review the submitted data.';
 

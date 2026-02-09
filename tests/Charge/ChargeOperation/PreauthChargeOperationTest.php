@@ -6,17 +6,18 @@ namespace Wipop\Tests\Charge\ChargeOperation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use Wipop\Charge\CaptureParams;
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeOperation;
-use Wipop\Charge\ChargeParams;
-use Wipop\Charge\OriginChannel;
-use Wipop\Charge\ReversalParams;
 use Wipop\Domain\Charge;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Domain\OriginChannel;
+use Wipop\Domain\ProductType;
 use Wipop\Domain\TransactionStatus;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\Value\Terminal;
+use Wipop\Operations\Charge\ChargeOperation;
+use Wipop\Operations\Charge\Params\CaptureParams;
+use Wipop\Operations\Charge\Params\ConfirmChargeParams;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Operations\Charge\Params\ReversalParams;
 
 /**
  * @internal
@@ -37,7 +38,7 @@ final class PreauthChargeOperationTest extends AbstractChargeOperationTestCase
             $this->successResponse(['status' => 'FAILED']),
         ], $history);
 
-        $preauthParams = (new ChargeParams())
+        $preauthParams = (new CreateChargeParams())
             ->amount(50.0)
             ->method(ChargeMethod::CARD)
             ->productType(ProductType::PAYMENT_GATEWAY)
@@ -50,13 +51,13 @@ final class PreauthChargeOperationTest extends AbstractChargeOperationTestCase
 
         $createResponse = $operation->create($preauthParams);
 
-        $confirmParams = (new CaptureParams())->amount(50.0);
+        $captureParams = (new CaptureParams())->amount(50.0);
 
-        $confirmResponse = $operation->confirmPreauthorization('txn_123', $confirmParams);
+        $confirmResponse = $operation->capture('txn_123', $captureParams);
 
         $reversalParams = (new ReversalParams())->reason('CLIENT_REQUEST');
 
-        $reversalResponse = $operation->reversePreauthorization('txn_123', $reversalParams);
+        $reversalResponse = $operation->reversal('txn_123', $reversalParams);
 
         $this->assertInstanceOf(Charge::class, $createResponse);
         $this->assertSame(TransactionStatus::IN_PROGRESS, $createResponse->status);
@@ -83,5 +84,28 @@ final class PreauthChargeOperationTest extends AbstractChargeOperationTestCase
 
         $reversalPath = $history[2]['request']->getUri()->getPath();
         $this->assertSame('/c/v1/' . self::MERCHANT_ID . '/charges/txn_123/reversal', $reversalPath);
+    }
+
+    #[Test]
+    public function itUsesConfirmEndpointForChargeConfirmation(): void
+    {
+        $history = [];
+        $operation = $this->createOperationWithMockResponses([
+            $this->successResponse(['status' => 'COMPLETED']),
+        ], $history);
+
+        $confirmResponse = $operation->confirm(
+            'txn_123',
+            (new ConfirmChargeParams())->amount(40.0)
+        );
+
+        $this->assertInstanceOf(Charge::class, $confirmResponse);
+        $this->assertSame(TransactionStatus::COMPLETED, $confirmResponse->status);
+
+        $confirmPath = $history[0]['request']->getUri()->getPath();
+        $this->assertSame('/c/v1/' . self::MERCHANT_ID . '/charges/txn_123/confirm', $confirmPath);
+
+        $confirmPayload = $this->decodeRequestBody($history[0]['request']);
+        $this->assertSame(40.0, (float) ($confirmPayload['amount'] ?? 0));
     }
 }

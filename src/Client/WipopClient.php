@@ -6,23 +6,25 @@ namespace Wipop\Client;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Wipop\Charge\ChargeOperation;
-use Wipop\Checkout\CheckoutOperation;
 use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Client\Http\HttpClientInterface;
-use Wipop\Merchant\MerchantOperation;
+use Wipop\Operations\Charge\ChargeOperation;
+use Wipop\Operations\Checkout\CheckoutOperation;
+use Wipop\Operations\Merchant\MerchantOperation;
+use Wipop\Operations\RecurrentPayment\RecurrentPaymentOperation;
 
 final class WipopClient
 {
     private readonly CheckoutOperation $checkoutOperation;
     private readonly ChargeOperation $chargeOperation;
     private readonly MerchantOperation $merchantOperation;
-    private readonly ClientConfiguration $configuration;
+    private readonly RecurrentPaymentOperation $recurrentPaymentOperation;
+    private readonly WipopClientConfiguration $configuration;
     private readonly HttpClientInterface $httpClient;
     private readonly LoggerInterface $logger;
 
     public function __construct(
-        ClientConfiguration $configuration,
+        WipopClientConfiguration $configuration,
         ?LoggerInterface $logger = null,
         ?HttpClientInterface $httpClient = null,
     ) {
@@ -47,9 +49,15 @@ final class WipopClient
             $this->configuration,
             $this->logger
         );
+
+        $this->recurrentPaymentOperation = new RecurrentPaymentOperation(
+            $this->httpClient,
+            $this->configuration,
+            $this->logger
+        );
     }
 
-    public function getConfiguration(): ClientConfiguration
+    public function getConfiguration(): WipopClientConfiguration
     {
         return $this->configuration;
     }
@@ -67,5 +75,10 @@ final class WipopClient
     public function merchantOperation(): MerchantOperation
     {
         return $this->merchantOperation;
+    }
+
+    public function recurrentPaymentOperation(): RecurrentPaymentOperation
+    {
+        return $this->recurrentPaymentOperation;
     }
 }

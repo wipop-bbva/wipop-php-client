@@ -8,9 +8,9 @@ use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Wipop\Checkout\CheckoutParams;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\Value\Terminal;
+use Wipop\Operations\Checkout\Params\CheckoutParams;
 
 /**
  * @internal

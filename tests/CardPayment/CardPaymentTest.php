@@ -7,9 +7,9 @@ namespace Wipop\Tests\CardPayment;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Wipop\CardPayment\CardPayment;
-use Wipop\Utils\PaymentMethod;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Input\CardPayment;
+use Wipop\Domain\Input\PaymentMethod;
+use Wipop\Domain\Value\Terminal;
 
 /**
  * @internal

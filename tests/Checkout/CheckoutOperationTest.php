@@ -14,23 +14,23 @@ use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Wipop\Checkout\CheckoutOperation;
-use Wipop\Checkout\CheckoutParams;
-use Wipop\Checkout\Origin;
-use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\Exception\ApiErrorCode;
 use Wipop\Client\Exception\WipopApiBusinessException;
-use Wipop\Client\Exception\WipopApiException;
 use Wipop\Client\Http\GuzzleHttpClient;
-use Wipop\Customer\Customer;
+use Wipop\Client\WipopClientConfiguration;
 use Wipop\Domain\Checkout as CheckoutResult;
-use Wipop\Utils\ChargeStatus;
-use Wipop\Utils\Currency;
-use Wipop\Utils\Language;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Currency;
+use Wipop\Domain\Input\Customer;
+use Wipop\Domain\Language;
+use Wipop\Domain\Origin;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Response\ChargeStatus;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\Value\Terminal;
+use Wipop\Exception\WipopException;
+use Wipop\Operations\Checkout\CheckoutOperation;
+use Wipop\Operations\Checkout\Params\CheckoutParams;
 
 use function is_float;
 use function json_decode;
@@ -61,7 +61,7 @@ class CheckoutOperationTest extends TestCase
             ->description('Test checkout')
         ;
 
-        $response = $operation->create($checkout);
+        $response = $operation->createCheckout($checkout);
 
         $this->assertCheckoutRequest(
             $history,
@@ -121,7 +121,7 @@ class CheckoutOperationTest extends TestCase
             ->description('Customer checkout')
         ;
 
-        $response = $operation->create($checkout);
+        $response = $operation->createCustomerCheckout('ext999', $checkout);
 
         $this->assertCheckoutRequest(
             $history,
@@ -153,7 +153,7 @@ class CheckoutOperationTest extends TestCase
     }
 
     #[Test]
-    public function itThrowsWipopApiExceptionOnHttpFail(): void
+    public function itThrowsWipopExceptionOnHttpFail(): void
     {
         $history = [];
         $operation = $this->createOperationWithMockResponses([
@@ -167,11 +167,11 @@ class CheckoutOperationTest extends TestCase
             ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
-        $this->expectException(WipopApiException::class);
+        $this->expectException(WipopException::class);
         $this->expectExceptionMessage('Error calling POST');
 
         try {
-            $operation->create($checkout);
+            $operation->createCheckout($checkout);
         } finally {
             $this->assertCount(1, $history);
         }
@@ -202,7 +202,7 @@ class CheckoutOperationTest extends TestCase
         $this->expectExceptionMessage('Business error');
 
         try {
-            $operation->create($checkout);
+            $operation->createCheckout($checkout);
         } finally {
             $this->assertCount(1, $history);
         }
@@ -225,7 +225,7 @@ class CheckoutOperationTest extends TestCase
             ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
-        $operation->create($params);
+        $operation->createCheckout($params);
 
         $this->assertCheckoutRequest(
             $history,
@@ -259,11 +259,11 @@ class CheckoutOperationTest extends TestCase
             ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
-        $this->expectException(WipopApiException::class);
+        $this->expectException(WipopException::class);
         $this->expectExceptionMessage('Error decoding JSON response');
 
         try {
-            $operation->create($checkout);
+            $operation->createCheckout($checkout);
         } finally {
             $this->assertCount(1, $history);
         }
@@ -288,7 +288,7 @@ class CheckoutOperationTest extends TestCase
             ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
-        $response = $operation->create($checkout);
+        $response = $operation->createCheckout($checkout);
 
         $this->assertSame(ChargeStatus::AVAILABLE, $response->status);
         $this->assertSame('123456', $response->id);
@@ -359,7 +359,7 @@ class CheckoutOperationTest extends TestCase
         $history = [];
         $handlerStack->push(Middleware::history($history));
 
-        $configuration = new ClientConfiguration(
+        $configuration = new WipopClientConfiguration(
             Environment::SANDBOX,
             self::MERCHANT_ID,
             'sk_test_secret'

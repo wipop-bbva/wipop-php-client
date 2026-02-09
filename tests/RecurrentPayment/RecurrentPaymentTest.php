@@ -6,11 +6,11 @@ namespace Wipop\Tests\RecurrentPayment;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Wipop\CardPayment\OriginChannel;
-use Wipop\RecurrentPayment\RecurrentPayment;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\PaymentMethod;
-use Wipop\Utils\ProductType;
+use Wipop\Domain\Input\OriginChannel;
+use Wipop\Domain\Input\PaymentMethod;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Operations\RecurrentPayment\RecurrentPayment;
 
 /**
  * @internal

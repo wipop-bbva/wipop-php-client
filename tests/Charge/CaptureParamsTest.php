@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Wipop\Charge\CaptureParams;
+use Wipop\Operations\Charge\Params\CaptureParams;
 
 /**
  * @internal

@@ -44,16 +44,16 @@ Biblioteca en PHP para integrar la pasarela de pagos Wipop con soporte completo 
 ## Inicio rápido
 
 ```php
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeParams;
-use Wipop\Client\ClientConfiguration;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Client\WipopClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
-$configuration = new ClientConfiguration(
+$configuration = new WipopClientConfiguration(
     Environment::SANDBOX,
     'tu-merchant-id',
     'tu-secret-key'
@@ -61,7 +61,7 @@ $configuration = new ClientConfiguration(
 
 $client = new WipopClient($configuration);
 
-$params = (new ChargeParams())
+$params = (new CreateChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(100.00)
     ->currency('EUR')
@@ -87,10 +87,10 @@ lanzarlos con `php docs/examples/<script>.php`.
 ### Configuración básica
 
 ```php
-use Wipop\Client\ClientConfiguration;
+use Wipop\Client\WipopClientConfiguration;
 use Wipop\Client\Environment;
 
-$config = new ClientConfiguration(
+$config = new WipopClientConfiguration(
     Environment::SANDBOX, // Environment::PRODUCTION para producción
     'merchant-id',
     'secret-key'
@@ -100,13 +100,13 @@ $config = new ClientConfiguration(
 ### Configuración HTTP
 
 ```php
-use Wipop\Client\ClientConfiguration;
-use Wipop\Client\ClientHttpConfiguration;
+use Wipop\Client\WipopClientConfiguration;
+use Wipop\Client\WipopClientHttpConfiguration;
 use Wipop\Client\Environment;
 
-$httpConfig = new ClientHttpConfiguration(10_000, 45_000);
+$httpConfig = new WipopClientHttpConfiguration(10_000, 45_000);
 
-$config = new ClientConfiguration(
+$config = new WipopClientConfiguration(
     Environment::SANDBOX,
     'merchant-id',
     'secret-key',
@@ -122,13 +122,13 @@ $config = new ClientConfiguration(
 ### Cargo con tarjeta
 
 ```php
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeParams;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
-$cardCharge = (new ChargeParams())
+$cardCharge = (new CreateChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(100.00)
     ->currency('EUR')
@@ -143,7 +143,7 @@ $response = $client->chargeOperation()->create($cardCharge);
 ### Cargo Bizum
 
 ```php
-$bizumCharge = (new ChargeParams())
+$bizumCharge = (new CreateChargeParams())
     ->method(ChargeMethod::BIZUM)
     ->amount(50.00)
     ->currency('EUR')
@@ -152,15 +152,19 @@ $bizumCharge = (new ChargeParams())
     ->productType(ProductType::PAYMENT_LINK)
     ->terminal(new Terminal(1));
 
-$response = $client->chargeOperation()->create($bizumCharge, 'customer-id');
+$response = $client->chargeOperation()->createCustomerCharge('customer-id', $bizumCharge);
 ```
 
 ### Confirmar / devolver / anular / capturar
 
 ```php
-use Wipop\Charge\CaptureParams;
-use Wipop\Charge\RefundParams;
-use Wipop\Charge\ReversalParams;
+use Wipop\Operations\Charge\Params\ConfirmChargeParams;
+use Wipop\Operations\Charge\Params\CaptureParams;
+use Wipop\Operations\Charge\Params\RefundParams;
+use Wipop\Operations\Charge\Params\ReversalParams;
+
+$confirm = (new ConfirmChargeParams())->amount(75.00);
+$client->chargeOperation()->confirm('transaction-id', $confirm);
 
 $capture = (new CaptureParams())->amount(75.00);
 $client->chargeOperation()->capture('transaction-id', $capture);
@@ -182,14 +186,14 @@ Para crear pagos recurrentes basta con construir el payload de `chargeOperation(
 fuente (sourceId) que devuelve la API.
 
 ```php
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeParams;
-use Wipop\Charge\PostType;
-use Wipop\Charge\PostTypeMode;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Domain\PostType;
+use Wipop\Domain\PostTypeMode;
+use Wipop\Domain\Value\Terminal;
 
 // Primer cargo: se tokeniza el medio de pago
-$primerCargo = (new ChargeParams())
+$primerCargo = (new CreateChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(29.99)
     ->useCof(true)
@@ -202,7 +206,7 @@ $respuestaInicial = $client->chargeOperation()->create($primerCargo);
 $sourceId = $respuestaInicial->card?->id; // persiste para los siguientes ciclos
 
 // Ciclos siguientes: se reutiliza el sourceId almacenado
-$cargoRecurrente = (new ChargeParams())
+$cargoRecurrente = (new CreateChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(29.99)
     ->sourceId($sourceId)
@@ -210,12 +214,27 @@ $cargoRecurrente = (new ChargeParams())
     ->terminal(new Terminal(1));
 
 $client->chargeOperation()->create($cargoRecurrente);
+
+```
+Operación recurrente
+
+```php
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\RecurrentPayment\Params\RecurrentPaymentParams;
+use Wipop\Domain\Value\Terminal;
+
+$recurrentParams = (new RecurrentPaymentParams())
+    ->method(ChargeMethod::CARD)
+    ->amount(29.99)
+    ->terminal(new Terminal(1));
+
+$client->recurrentPaymentOperation()->create($recurrentParams);
 ```
 
 ## Operaciones de checkout
 
 ```php
-use Wipop\Checkout\CheckoutParams;
+use Wipop\Operations\Checkout\Params\CheckoutParams;
 
 $checkoutParams = (new CheckoutParams())
     ->amount(49.90)
@@ -227,16 +246,15 @@ $checkoutParams = (new CheckoutParams())
     ->redirectUrl('https://tu-sitio.com/success')
     ->sendEmail(true);
 
-$checkout = $client->checkoutOperation()->create($checkoutParams);
+$checkout = $client->checkoutOperation()->createCheckout($checkoutParams);
 ```
 
 ### Checkout para un cliente existente
 
-Si el cliente ya existe en Wipop, envía una instancia de `Wipop\Customer\Customer` con su `publicId`.
-La librería llamará automáticamente a `/customers/{customerId}/checkouts`.
+Si el cliente ya existe en Wipop, usa `createCustomerCheckout()` pasando su `publicId`.
 
 ```php
-use Wipop\Customer\Customer;
+use Wipop\Domain\Input\Customer;
 
 $clienteExistente = new Customer(
     name: 'Ana',
@@ -254,7 +272,7 @@ $checkoutParams = (new CheckoutParams())
     ->terminal(new Terminal(1))
     ->customer($clienteExistente);
 
-$checkout = $client->checkoutOperation()->create($checkoutParams);
+$checkout = $client->checkoutOperation()->createCustomerCheckout('cust_1234567890', $checkoutParams);
 ```
 
 ## Operaciones de merchant
@@ -262,8 +280,8 @@ $checkout = $client->checkoutOperation()->create($checkoutParams);
 Consulta los métodos de pago habilitados para un merchant y terminal concretos.
 
 ```php
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
 $metodos = $client
     ->merchantOperation()
@@ -275,11 +293,11 @@ $metodos = $client
 ## Manejo de errores
 
 ```php
-use Wipop\Client\Exception\WipopApiException;
+use Wipop\Exception\WipopException;
 
 try {
     $charge = $client->chargeOperation()->create($params);
-} catch (WipopApiException $exception) {
+} catch (WipopException $exception) {
     // Maneja el error según código
 }
 ```
@@ -287,13 +305,14 @@ try {
 ## Referencia de API
 
 - **WipopClient**: punto de entrada.
-- **ClientConfiguration / ClientHttpConfiguration / Environment**: configuración del cliente.
+- **WipopClientConfiguration / WipopClientHttpConfiguration / Environment**: configuración del cliente.
 - **ChargeOperation**: creación, confirmación, devolución, anulación y captura.
 - **CheckoutOperation**: gestión de sesiones de checkout.
 - **MerchantOperation**: consulta de metadatos del comercio (métodos de pago habilitados).
-- **ChargeParams / CaptureParams / RefundParams / ReversalParams**.
+- **RecurrentPaymentOperation**: wrapper para crear cargos recurrentes.
+- **CreateChargeParams / ConfirmChargeParams / CaptureParams / RefundParams / ReversalParams**.
 - **CheckoutParams**.
-- **Modelos de dominio**: `Charge`, `Checkout`, `Customer`, `Terminal`, `PaymentMethod`, `TransactionStatus`.
+- **Modelos de dominio**: `Charge`, `Checkout`, `Customer`, `Terminal`, `PaymentMethod`, `ChargeMethod`, `TransactionStatus`.
 
 
 ## Soporte

@@ -39,16 +39,16 @@ A modern PHP client library for the Wipop payment processing API with full type 
 ## Quick Start
 
 ```php
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeParams;
-use Wipop\Client\ClientConfiguration;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Client\WipopClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
-$configuration = new ClientConfiguration(
+$configuration = new WipopClientConfiguration(
     Environment::SANDBOX,
     'your-merchant-id',
     'your-secret-key'
@@ -56,7 +56,7 @@ $configuration = new ClientConfiguration(
 
 $client = new WipopClient($configuration);
 
-$params = (new ChargeParams())
+$params = (new CreateChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(100.00)
     ->currency('EUR')
@@ -82,10 +82,10 @@ executed with `php docs/examples/<script>.php`.
 ### Basic Configuration
 
 ```php
-use Wipop\Client\ClientConfiguration;
+use Wipop\Client\WipopClientConfiguration;
 use Wipop\Client\Environment;
 
-$config = new ClientConfiguration(
+$config = new WipopClientConfiguration(
     Environment::SANDBOX, // Environment::PRODUCTION for live operations
     'your-merchant-id',
     'your-secret-key'
@@ -95,16 +95,16 @@ $config = new ClientConfiguration(
 ### HTTP Configuration
 
 ```php
-use Wipop\Client\ClientConfiguration;
-use Wipop\Client\ClientHttpConfiguration;
+use Wipop\Client\WipopClientConfiguration;
+use Wipop\Client\WipopClientHttpConfiguration;
 use Wipop\Client\Environment;
 
-$httpConfig = new ClientHttpConfiguration(
+$httpConfig = new WipopClientHttpConfiguration(
     10_000,
     45_000
 );
 
-$config = new ClientConfiguration(
+$config = new WipopClientConfiguration(
     Environment::SANDBOX,
     'merchant-id',
     'secret-key',
@@ -120,13 +120,13 @@ $config = new ClientConfiguration(
 ### Create Card Charge
 
 ```php
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeParams;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
-$cardCharge = (new ChargeParams())
+$cardCharge = (new CreateChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(100.00)
     ->currency('EUR')
@@ -141,7 +141,7 @@ $response = $client->chargeOperation()->create($cardCharge);
 ### Create Bizum Charge
 
 ```php
-$bizumCharge = (new ChargeParams())
+$bizumCharge = (new CreateChargeParams())
     ->method(ChargeMethod::BIZUM)
     ->amount(50.00)
     ->currency('EUR')
@@ -150,15 +150,19 @@ $bizumCharge = (new ChargeParams())
     ->productType(ProductType::PAYMENT_LINK)
     ->terminal(new Terminal(1));
 
-$response = $client->chargeOperation()->create($bizumCharge, 'customer-id');
+$response = $client->chargeOperation()->createCustomerCharge('customer-id', $bizumCharge);
 ```
 
 ### Confirm / Refund / Reverse / Capture
 
 ```php
-use Wipop\Charge\CaptureParams;
-use Wipop\Charge\RefundParams;
-use Wipop\Charge\ReversalParams;
+use Wipop\Operations\Charge\Params\ConfirmChargeParams;
+use Wipop\Operations\Charge\Params\CaptureParams;
+use Wipop\Operations\Charge\Params\RefundParams;
+use Wipop\Operations\Charge\Params\ReversalParams;
+
+$confirm = (new ConfirmChargeParams())->amount(75.00);
+$client->chargeOperation()->confirm('transaction-id', $confirm);
 
 $capture = (new CaptureParams())->amount(75.00);
 $client->chargeOperation()->capture('transaction-id', $capture);
@@ -172,7 +176,7 @@ $client->chargeOperation()->reversal('transaction-id', $reversal);
 
 ### Tokenization / One-Click / Recurring / Pre-authorization
 
-Use `ChargeParams::useCof(true)` to tokenize, `sourceId()` for one-click charges, `postType()` with `PostTypeMode::RECURRENT` for recurring payments, and `capture(false)` for pre-authorizations.
+Use `CreateChargeParams::useCof(true)` to tokenize, `sourceId()` for one-click charges, `postType()` with `PostTypeMode::RECURRENT` for recurring payments, and `capture(false)` for pre-authorizations.
 
 ### Recurring Payments
 
@@ -181,14 +185,14 @@ payload to flag the transaction as recurring and, after the first successful cha
 generated source identifier.
 
 ```php
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeParams;
-use Wipop\Charge\PostType;
-use Wipop\Charge\PostTypeMode;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Domain\PostType;
+use Wipop\Domain\PostTypeMode;
+use Wipop\Domain\Value\Terminal;
 
 // First charge: tokenize cardholder for future cycles
-$initialCharge = (new ChargeParams())
+$initialCharge = (new CreateChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(29.99)
     ->useCof(true)
@@ -201,7 +205,7 @@ $initialResponse = $client->chargeOperation()->create($initialCharge);
 $sourceId = $initialResponse->card?->id; // persist for later cycles
 
 // Subsequent cycles: reuse the stored sourceId
-$recurringCharge = (new ChargeParams())
+$recurringCharge = (new CreateChargeParams())
     ->method(ChargeMethod::CARD)
     ->amount(29.99)
     ->sourceId($sourceId)
@@ -211,10 +215,23 @@ $recurringCharge = (new ChargeParams())
 $client->chargeOperation()->create($recurringCharge);
 ```
 
+```php
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\RecurrentPayment\Params\RecurrentPaymentParams;
+use Wipop\Domain\Value\Terminal;
+
+$recurringParams = (new RecurrentPaymentParams())
+    ->method(ChargeMethod::CARD)
+    ->amount(29.99)
+    ->terminal(new Terminal(1));
+
+$client->recurrentPaymentOperation()->create($recurringParams);
+```
+
 ## Checkout Operations
 
 ```php
-use Wipop\Checkout\CheckoutParams;
+use Wipop\Operations\Checkout\Params\CheckoutParams;
 
 $checkoutParams = (new CheckoutParams())
     ->amount(49.90)
@@ -226,17 +243,16 @@ $checkoutParams = (new CheckoutParams())
     ->redirectUrl('https://your-site.com/success')
     ->sendEmail(true);
 
-$checkout = $client->checkoutOperation()->create($checkoutParams);
+$checkout = $client->checkoutOperation()->createCheckout($checkoutParams);
 ```
 
 ### Checkout for an Existing Customer
 
-If you need to create a checkout for a known customer, pass an instance of `Wipop\Customer\Customer`
-containing the `publicId`. The SDK will automatically call the `/customers/{customerId}/checkouts`
-endpoint.
+If you need to create a checkout for a known customer, call `createCustomerCheckout()` with the
+customer public id.
 
 ```php
-use Wipop\Customer\Customer;
+use Wipop\Domain\Input\Customer;
 
 $existingCustomer = new Customer(
     name: 'Ana',
@@ -254,7 +270,7 @@ $checkoutParams = (new CheckoutParams())
     ->terminal(new Terminal(1))
     ->customer($existingCustomer);
 
-$checkout = $client->checkoutOperation()->create($checkoutParams);
+$checkout = $client->checkoutOperation()->createCustomerCheckout('cust_1234567890', $checkoutParams);
 ```
 
 ## Merchant Operations
@@ -262,8 +278,8 @@ $checkout = $client->checkoutOperation()->create($checkoutParams);
 Retrieve the payment methods enabled for a merchant/terminal combination. 
 
 ```php
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
 $methods = $client
     ->merchantOperation()
@@ -275,11 +291,11 @@ $methods = $client
 ## Error Handling
 
 ```php
-use Wipop\Client\Exception\WipopApiException;
+use Wipop\Exception\WipopException;
 
 try {
     $charge = $client->chargeOperation()->create($params);
-} catch (WipopApiException $exception) {
+} catch (WipopException $exception) {
     // Inspect $exception->getCode()
 }
 ```
@@ -287,11 +303,12 @@ try {
 ## API Reference
 
 - **WipopClient**: entrypoint for API operations.
-- **ClientConfiguration / ClientHttpConfiguration / Environment**: client setup.
+- **WipopClientConfiguration / WipopClientHttpConfiguration / Environment**: client setup.
 - **ChargeOperation**: create, confirm, refund, reverse, capture charges.
 - **CheckoutOperation**: manage checkout sessions.
 - **MerchantOperation**: inspect merchant metadata such as enabled payment methods.
-- **ChargeParams / CaptureParams / RefundParams / ReversalParams**: payload builders.
+- **RecurrentPaymentOperation**: convenience wrapper for recurring charge creation.
+- **CreateChargeParams / ConfirmChargeParams / CaptureParams / RefundParams / ReversalParams**: payload builders.
 - **CheckoutParams**: checkout payload builder.
 - **Domain models**: `Charge`, `Checkout`, `Customer`, `Terminal`, `PaymentMethod`, `TransactionStatus`.
 

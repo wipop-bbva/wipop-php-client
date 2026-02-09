@@ -6,16 +6,16 @@ namespace Wipop\Tests\Charge\ChargeOperation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeOperation;
-use Wipop\Charge\ChargeParams;
-use Wipop\Charge\OriginChannel;
 use Wipop\Domain\Charge;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Domain\Currency;
+use Wipop\Domain\OriginChannel;
+use Wipop\Domain\ProductType;
 use Wipop\Domain\TransactionStatus;
-use Wipop\Utils\Currency;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\Value\Terminal;
+use Wipop\Operations\Charge\ChargeOperation;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
 
 /**
  * @internal
@@ -29,7 +29,7 @@ final class BizumChargeOperationTest extends AbstractChargeOperationTestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
-        $params = (new ChargeParams())
+        $params = (new CreateChargeParams())
             ->amount(45.0)
             ->method(ChargeMethod::BIZUM)
             ->terminal(new Terminal(1))
@@ -43,7 +43,7 @@ final class BizumChargeOperationTest extends AbstractChargeOperationTestCase
             ->orderId(OrderId::fromString(self::ORDER_ID))
         ;
 
-        $response = $operation->create($params, 'cust_123');
+        $response = $operation->createCustomerCharge('cust_123', $params);
         $this->assertInstanceOf(Charge::class, $response);
         $this->assertSame(TransactionStatus::CHARGE_PENDING, $response->status);
 

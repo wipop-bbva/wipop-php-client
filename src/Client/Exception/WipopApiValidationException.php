@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Wipop\Client\Exception;
 
 use Throwable;
+use Wipop\Exception\WipopException;
 
-final class WipopApiValidationException extends WipopApiException
+final class WipopApiValidationException extends WipopException
 {
     public const DEFAULT_MESSAGE = 'Invalid data: review the information provided.';
 

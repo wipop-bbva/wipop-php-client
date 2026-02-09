@@ -5,19 +5,19 @@ declare(strict_types=1);
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Wipop\Charge\CaptureParams;
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeParams;
-use Wipop\Charge\OriginChannel;
-use Wipop\Client\ClientConfiguration;
+use Wipop\Operations\Charge\Params\CaptureParams;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Domain\OriginChannel;
+use Wipop\Client\WipopClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
-use Wipop\Customer\Customer;
+use Wipop\Domain\Input\Customer;
 use Wipop\Examples\ExampleUtils;
-use Wipop\Utils\Currency;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Currency;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/exampleUtils.php';
@@ -35,7 +35,7 @@ if ($merchantId === false || $secretKey === false) {
 
 $logger = new Logger('wipop-preauth-confirm-example', [new StreamHandler('php://stdout')]);
 
-$configuration = new ClientConfiguration(
+$configuration = new WipopClientConfiguration(
     Environment::SANDBOX,
     $merchantId,
     $secretKey
@@ -49,7 +49,7 @@ $customer = new Customer(
     'diego.fernandez@example.com'
 );
 
-$preauthParams = (new ChargeParams())
+$preauthParams = (new CreateChargeParams())
     ->amount(30.0)
     ->method(ChargeMethod::CARD)
     ->currency(Currency::EUR)
@@ -80,19 +80,19 @@ if ($transactionId === null || $transactionId === '') {
     exit(1);
 }
 
-$captureParams = (new CaptureParams())
+$confirmParams = (new CaptureParams())
     ->amount(30.0);
 
 try {
-    $captureResponse = $client->chargeOperation()->capture($transactionId, $captureParams);
+    $confirmResponse = $client->chargeOperation()->capture($transactionId, $confirmParams);
 } catch (Throwable $exception) {
-    $logger->error('Preauth capture failed', ['exception' => $exception]);
-    fwrite(STDERR, sprintf("Capture failed: %s\n", $exception->getMessage()));
+    $logger->error('Preauth confirm failed', ['exception' => $exception]);
+    fwrite(STDERR, sprintf("Confirm failed: %s\n", $exception->getMessage()));
     exit(1);
 }
 
 printf(
     "Preauth confirmed!\nID: %s\nFinal status: %s\n",
-    $captureResponse->id ?? $transactionId,
-    $captureResponse->status->value ?? 'UNKNOWN'
+    $confirmResponse->id ?? $transactionId,
+    $confirmResponse->status->value ?? 'UNKNOWN'
 );
