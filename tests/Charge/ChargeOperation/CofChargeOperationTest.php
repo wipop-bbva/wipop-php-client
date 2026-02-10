@@ -6,17 +6,17 @@ namespace Wipop\Tests\Charge\ChargeOperation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeOperation;
-use Wipop\Charge\ChargeParams;
-use Wipop\Charge\OriginChannel;
-use Wipop\Charge\PostType;
-use Wipop\Charge\PostTypeMode;
 use Wipop\Domain\Charge;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Domain\OriginChannel;
+use Wipop\Domain\PostType;
+use Wipop\Domain\PostTypeMode;
+use Wipop\Domain\ProductType;
 use Wipop\Domain\TransactionStatus;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\Value\Terminal;
+use Wipop\Operations\Charge\ChargeOperation;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
 
 /**
  * @internal
@@ -41,7 +41,7 @@ final class CofChargeOperationTest extends AbstractChargeOperationTestCase
             ]),
         ], $history);
 
-        $tokenizationParams = (new ChargeParams())
+        $tokenizationParams = (new CreateChargeParams())
             ->amount(0.0)
             ->method(ChargeMethod::CARD)
             ->productType(ProductType::PAYMENT_LINK)
@@ -58,7 +58,7 @@ final class CofChargeOperationTest extends AbstractChargeOperationTestCase
         $this->assertFalse($response->useCof);
         $this->assertSame('card_token_6789', $response->card?->id);
 
-        $gatewayParams = (new ChargeParams())
+        $gatewayParams = (new CreateChargeParams())
             ->amount(35.0)
             ->method(ChargeMethod::CARD)
             ->productType(ProductType::PAYMENT_GATEWAY)

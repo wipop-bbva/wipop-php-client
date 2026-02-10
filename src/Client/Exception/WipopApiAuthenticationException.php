@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Wipop\Client\Exception;
 
 use Throwable;
+use Wipop\Exception\WipopException;
 
-final class WipopApiAuthenticationException extends WipopApiException
+final class WipopApiAuthenticationException extends WipopException
 {
     public const DEFAULT_MESSAGE = 'The operation could not be authenticated.';
 

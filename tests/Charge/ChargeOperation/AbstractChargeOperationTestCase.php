@@ -10,14 +10,14 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeOperation;
-use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\Http\GuzzleHttpClient;
+use Wipop\Client\WipopClientConfiguration;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Domain\Currency;
 use Wipop\Domain\PaymentMethodType;
 use Wipop\Domain\TransactionStatus;
-use Wipop\Utils\Currency;
+use Wipop\Operations\Charge\ChargeOperation;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -34,7 +34,7 @@ abstract class AbstractChargeOperationTestCase extends TestCase
         $history = [];
         $handlerStack->push(Middleware::history($history));
 
-        $configuration = new ClientConfiguration(
+        $configuration = new WipopClientConfiguration(
             Environment::SANDBOX,
             self::MERCHANT_ID,
             'sk_test_secret'

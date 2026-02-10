@@ -5,17 +5,17 @@ declare(strict_types=1);
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeParams;
-use Wipop\Charge\OriginChannel;
-use Wipop\Client\ClientConfiguration;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
+use Wipop\Domain\OriginChannel;
+use Wipop\Client\WipopClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
-use Wipop\Customer\Customer;
+use Wipop\Domain\Input\Customer;
 use Wipop\Examples\ExampleUtils;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/exampleUtils.php';
@@ -33,7 +33,7 @@ if ($merchantId === false || $secretKey === false) {
 
 $logger = new Logger('wipop-bizum-charge-example', [new StreamHandler('php://stdout')]);
 
-$configuration = new ClientConfiguration(
+$configuration = new WipopClientConfiguration(
     Environment::SANDBOX,
     $merchantId,
     $secretKey
@@ -47,7 +47,7 @@ $customer = new Customer(
     'carlos.lopez@example.com'
 );
 
-$chargeParams = (new ChargeParams())
+$chargeParams = (new CreateChargeParams())
     ->amount(15.00)
     ->method(ChargeMethod::BIZUM)
     ->productType(ProductType::PAYMENT_LINK)

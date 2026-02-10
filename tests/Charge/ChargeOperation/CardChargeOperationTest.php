@@ -7,18 +7,18 @@ namespace Wipop\Tests\Charge\ChargeOperation;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use Wipop\CardPayment\Card;
-use Wipop\Charge\ChargeMethod;
-use Wipop\Charge\ChargeOperation;
-use Wipop\Charge\ChargeParams;
-use Wipop\Charge\OriginChannel;
 use Wipop\Domain\Charge;
+use Wipop\Domain\ChargeMethod;
+use Wipop\Domain\Currency;
+use Wipop\Domain\Input\Card;
+use Wipop\Domain\OriginChannel;
 use Wipop\Domain\PaymentMethodType;
+use Wipop\Domain\ProductType;
 use Wipop\Domain\TransactionStatus;
-use Wipop\Utils\Currency;
-use Wipop\Utils\OrderId;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\Value\OrderId;
+use Wipop\Domain\Value\Terminal;
+use Wipop\Operations\Charge\ChargeOperation;
+use Wipop\Operations\Charge\Params\CreateChargeParams;
 
 /**
  * @internal
@@ -32,7 +32,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
-        $params = (new ChargeParams())
+        $params = (new CreateChargeParams())
             ->amount(100.0)
             ->method(ChargeMethod::CARD)
             ->terminal(new Terminal(1))
@@ -86,7 +86,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
-        $params = (new ChargeParams())
+        $params = (new CreateChargeParams())
             ->amount(100.0)
             ->method(ChargeMethod::CARD)
             ->productType(ProductType::PAYMENT_GATEWAY)
@@ -127,7 +127,7 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
         $history = [];
         $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
 
-        $params = (new ChargeParams())->amount(10.0);
+        $params = (new CreateChargeParams())->amount(10.0);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Charge terminal is required.');

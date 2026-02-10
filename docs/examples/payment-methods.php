@@ -5,11 +5,11 @@ declare(strict_types=1);
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Wipop\Client\ClientConfiguration;
+use Wipop\Client\WipopClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\WipopClient;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
 
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/exampleUtils.php';
@@ -27,7 +27,7 @@ if ($merchantId === false || $secretKey === false) {
 
 $logger = new Logger('wipop-payment-methods-example', [new StreamHandler('php://stdout')]);
 
-$configuration = new ClientConfiguration(
+$configuration = new WipopClientConfiguration(
     Environment::SANDBOX,
     $merchantId,
     $secretKey

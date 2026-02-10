@@ -8,8 +8,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
-use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Exception\HttpTransportException;
+use Wipop\Client\WipopClientConfiguration;
 
 use function array_merge;
 use function base64_encode;
@@ -24,7 +24,7 @@ final class GuzzleHttpClient implements HttpClientInterface
     /**
      * @param array<string, mixed> $options
      */
-    public function __construct(ClientConfiguration $configuration, array $options = [])
+    public function __construct(WipopClientConfiguration $configuration, array $options = [])
     {
         $secretKey = $configuration->getSecretKey();
 

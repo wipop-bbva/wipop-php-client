@@ -11,12 +11,12 @@ use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\Http\GuzzleHttpClient;
-use Wipop\Merchant\MerchantOperation;
-use Wipop\Utils\ProductType;
-use Wipop\Utils\Terminal;
+use Wipop\Client\WipopClientConfiguration;
+use Wipop\Domain\ProductType;
+use Wipop\Domain\Value\Terminal;
+use Wipop\Operations\Merchant\MerchantOperation;
 
 use function json_encode;
 
@@ -67,7 +67,7 @@ final class MerchantOperationTest extends TestCase
         $history = [];
         $handlerStack->push(Middleware::history($history));
 
-        $configuration = new ClientConfiguration(
+        $configuration = new WipopClientConfiguration(
             Environment::SANDBOX,
             self::MERCHANT_ID,
             'sk_test_secret'

@@ -11,12 +11,13 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
 use ReflectionObject;
 use ReflectionProperty;
-use Wipop\Checkout\CheckoutOperation;
-use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Environment;
 use Wipop\Client\Http\GuzzleHttpClient;
 use Wipop\Client\WipopClient;
-use Wipop\Merchant\MerchantOperation;
+use Wipop\Client\WipopClientConfiguration;
+use Wipop\Operations\Checkout\CheckoutOperation;
+use Wipop\Operations\Merchant\MerchantOperation;
+use Wipop\Operations\RecurrentPayment\RecurrentPaymentOperation;
 
 use function is_array;
 
@@ -29,7 +30,7 @@ class WipopClientTest extends TestCase
     #[Test]
     public function itConfiguresDefaultHttpClientFromConfiguration(): void
     {
-        $configuration = new ClientConfiguration(
+        $configuration = new WipopClientConfiguration(
             Environment::SANDBOX,
             'm1234567890123456789',
             'sk_test_secret:'
@@ -65,6 +66,7 @@ class WipopClientTest extends TestCase
         $this->assertSame($configuration, $client->getConfiguration());
         $this->assertInstanceOf(CheckoutOperation::class, $client->checkoutOperation());
         $this->assertInstanceOf(MerchantOperation::class, $client->merchantOperation());
+        $this->assertInstanceOf(RecurrentPaymentOperation::class, $client->recurrentPaymentOperation());
     }
 
     private function extractHttpClient(WipopClient $client): GuzzleHttpClient

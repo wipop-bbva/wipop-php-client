@@ -6,11 +6,11 @@ namespace Wipop\Client\Operation;
 
 use JsonException;
 use Psr\Log\LoggerInterface;
-use Wipop\Client\ClientConfiguration;
 use Wipop\Client\Exception\HttpTransportException;
-use Wipop\Client\Exception\WipopApiException;
 use Wipop\Client\Exception\WipopApiExceptionFactory;
 use Wipop\Client\Http\HttpClientInterface;
+use Wipop\Client\WipopClientConfiguration;
+use Wipop\Exception\WipopException;
 use Wipop\Serializer\Hydrator;
 
 use function is_array;
@@ -26,14 +26,14 @@ abstract class AbstractOperation
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
-        private readonly ClientConfiguration $configuration,
+        private readonly WipopClientConfiguration $configuration,
         private readonly LoggerInterface $logger,
         ?Hydrator $hydrator = null,
     ) {
         $this->hydrator = $hydrator ?? new Hydrator();
     }
 
-    protected function getConfiguration(): ClientConfiguration
+    protected function getConfiguration(): WipopClientConfiguration
     {
         return $this->configuration;
     }
@@ -119,7 +119,7 @@ abstract class AbstractOperation
             $message = sprintf('Error calling %s %s: %s', $method, $path, $exception->getMessage());
             $this->logger->error($message);
 
-            throw new WipopApiException($message, null, $exception);
+            throw new WipopException($message, null, $exception);
         }
 
         try {
@@ -134,7 +134,7 @@ abstract class AbstractOperation
             $message = sprintf('Error decoding JSON response from %s %s: %s', $method, $path, $exception->getMessage());
             $this->logger->error($message);
 
-            throw new WipopApiException($message, null, $exception);
+            throw new WipopException($message, null, $exception);
         }
 
         $this->assertNoApiError($data);
