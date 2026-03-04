@@ -29,7 +29,9 @@ Biblioteca en PHP para integrar la pasarela de pagos Wipop con soporte completo 
 
 ## Instalación
 
-// TODO: subir a repo composer 
+```bash
+composer require wipop-bbva/wipop-php-client
+```
 
 ## Antes de empezar
 - Haber completado la identificación en el proceso de contratación de la pasarela de pago Wipöp.
@@ -78,7 +80,7 @@ $charge = $client->chargeOperation()->create($params);
 Los ejemplos ejecutables se encuentran en `docs/examples` y leen credenciales desde `.env`. Puedes
 lanzarlos con `php docs/examples/<script>.php`.
 
-- `card-charge.php` / `bizum-charge.php`: generán cargos/link de pago para tarjeta o Bizum.
+- `card-charge.php` / `bizum-charge.php`: generan cargos/link de pago para tarjeta o Bizum.
 - `checkout.php` / `checkoutCustomer.php`: crean checkouts para clientes anónimos o registrados.
 - `preauth-confirm.php` / `preauth-cancel.php`: muestran el flujo de preautorizaciones.
 - `payment-methods.php`: consulta los métodos de pago activos para tu comercio.
@@ -317,4 +319,4 @@ try {
 
 ## Soporte
 
-Para soporte y preguntas, por favor contacta al equipo de soporta o [crea un issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/quickstart) en el repositorio del proyecto.
+Para soporte y preguntas, por favor contacta al equipo de soporte o [crea un issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/quickstart) en el repositorio del proyecto.
