@@ -29,7 +29,9 @@ A modern PHP client library for the Wipop payment processing API with full type 
 
 ## Installation
 
-// TODO
+```bash
+composer require wipop-bbva/wipop-php-client
+```
 
 ## Before Getting Started
 - Have completed the identification process during the Wipöp payment gateway contracting.
