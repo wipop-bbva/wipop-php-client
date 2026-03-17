@@ -55,4 +55,5 @@ jobs:
 
       - name: Skip release (no releasable commits)
         if: steps.tag.outputs.new_tag == '' || steps.tag.outputs.new_tag == steps.tag.outputs.previous_tag
-        run: echo "Release skipped: no releasable commits since last tag."
+        run: |
+          echo "Release skipped: no releasable commits since last tag."
