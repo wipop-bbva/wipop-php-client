@@ -17,6 +17,13 @@ use Wipop\Domain\Value\Terminal;
 final class TerminalTest extends TestCase
 {
     #[Test]
+    public function itShouldExposeTheSupportedTerminalIdRange(): void
+    {
+        $this->assertSame(1, Terminal::MIN_TERMINAL_ID);
+        $this->assertSame(99, Terminal::MAX_TERMINAL_ID);
+    }
+
+    #[Test]
     #[DataProvider('terminalIdsProvider')]
     public function itShouldExposeTheConfiguredIdentifier(int $terminalId): void
     {

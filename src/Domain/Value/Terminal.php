@@ -8,6 +8,9 @@ use Stringable;
 
 final class Terminal implements Stringable
 {
+    public const MIN_TERMINAL_ID = 1;
+    public const MAX_TERMINAL_ID = 99;
+
     public function __construct(
         private readonly int $id
     ) {
