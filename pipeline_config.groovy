@@ -11,7 +11,7 @@ jte {
 }
 
 libraries {
-    maven
+    php
 }
 
 application_environments {
