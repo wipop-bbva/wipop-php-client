@@ -5,6 +5,7 @@ maven_install = 'openpay-maven-3.9.6'
 sonatype_credentials_id = 'ossrh'
 secret_name = 'op-mx-dev-jenkins'
 git_credentials_id = 'jenkins-github-wipop-bbva'
+packagist_api_token_id="jenkins-packagist-wipop-bbva"
 agent= 'op_jenkins_mx_dev_slave_2023_php'
 init_agent = 'op_jenkins_mx_dev_slave_2023_php'
 jte {
