@@ -1,5 +1,5 @@
 {
-  "name": "wipop-bbva/wipop-php-client",
+  "name": "jenkinslatamwipop/wipop-php-client",
   "type": "library",
   "description": "A PHP library for integrating Wipop payment gateway.",
   "license": "MIT",
