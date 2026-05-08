@@ -1,7 +1,6 @@
 is_github_repo = 'true'
 git_credentials_id = 'jenkins-github-wipop-bbva'
-packagist_api_token_id="jenkins-packagist-wipop-bbva"
-automatic_versioning = 'false'
+packagist_api_token_id= "jk-packagist-wipop-by-bbva-official"
 packagist_username = 'jenkinslatamwipop'
 
 agent= 'op_jenkins_mx_dev_slave_2023_php'
