@@ -10,5 +10,6 @@ enum TransactionStatus: string
     case ERROR = 'ERROR';
     case FAILED = 'FAILED';
     case COMPLETED = 'COMPLETED';
+    case CANCELLED = 'CANCELLED';
     case IN_PROGRESS = 'IN_PROGRESS';
 }
