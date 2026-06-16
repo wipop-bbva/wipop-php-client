@@ -49,6 +49,5 @@
     "allow-plugins": {
       "phpro/grumphp": true
     }
-  },
-  "version": "0.9.12"
+  }
 }
