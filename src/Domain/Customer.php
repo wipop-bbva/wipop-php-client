@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Wipop\Domain;
 
 use DateTimeImmutable;
-use Symfony\Component\Serializer\Attribute\SerializedName;
+use Wipop\Serializer\Attribute\SerializedName;
 
 final class Customer
 {
