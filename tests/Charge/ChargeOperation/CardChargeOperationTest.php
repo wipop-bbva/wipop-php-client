@@ -7,6 +7,7 @@ namespace Wipop\Tests\Charge\ChargeOperation;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Wipop\Domain\Charge;
 use Wipop\Domain\ChargeMethod;
 use Wipop\Domain\Currency;
@@ -78,6 +79,27 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
                 'terminal' => ['id' => 1],
             ]
         );
+    }
+
+    #[Test]
+    public function itRejectsMalformedNumericApiResponseFields(): void
+    {
+        $history = [];
+        $operation = $this->createOperationWithMockResponses([$this->successResponse([
+            'amount' => 'oops',
+        ])], $history);
+
+        $params = (new CreateChargeParams())
+            ->amount(100.0)
+            ->method(ChargeMethod::CARD)
+            ->terminal(new Terminal(1))
+            ->productType(ProductType::PAYMENT_LINK)
+        ;
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Unable to hydrate Wipop numeric value');
+
+        $operation->create($params);
     }
 
     #[Test]

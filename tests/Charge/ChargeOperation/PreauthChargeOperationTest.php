@@ -35,7 +35,7 @@ final class PreauthChargeOperationTest extends AbstractChargeOperationTestCase
                 'payment_method' => null,
             ]),
             $this->successResponse(['status' => 'COMPLETED']),
-            $this->successResponse(['status' => 'FAILED']),
+            $this->successResponse(['status' => 'CANCELLED']),
         ], $history);
 
         $preauthParams = (new CreateChargeParams())
@@ -67,7 +67,7 @@ final class PreauthChargeOperationTest extends AbstractChargeOperationTestCase
         $this->assertSame(TransactionStatus::COMPLETED, $confirmResponse->status);
 
         $this->assertInstanceOf(Charge::class, $reversalResponse);
-        $this->assertSame(TransactionStatus::FAILED, $reversalResponse->status);
+        $this->assertSame(TransactionStatus::CANCELLED, $reversalResponse->status);
 
         $firstPayload = $this->decodeRequestBody($history[0]['request']);
         $this->assertFalse($firstPayload['capture']);
