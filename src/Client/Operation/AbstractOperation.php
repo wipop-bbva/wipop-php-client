@@ -13,9 +13,14 @@ use Wipop\Client\WipopClientConfiguration;
 use Wipop\Exception\WipopException;
 use Wipop\Serializer\Hydrator;
 
+use function ini_get;
+use function ini_set;
 use function is_array;
 use function json_decode;
+use function json_encode;
 use function sprintf;
+
+use const JSON_THROW_ON_ERROR;
 
 /**
  * Base class for centralized Wipop HTTP requests, error handling and JSON decoding.
@@ -96,7 +101,7 @@ abstract class AbstractOperation
         $options = [];
 
         if ($payload !== []) {
-            $options['json'] = $payload;
+            $options['body'] = $this->encodeJson($payload);
         }
 
         if ($query !== []) {
@@ -104,6 +109,24 @@ abstract class AbstractOperation
         }
 
         return $options;
+    }
+
+    /**
+     * Encodes floats in their shortest form (0.05, not 0.050000000000000003),
+     * regardless of the host's serialize_precision.
+     *
+     * @param array<string, mixed> $payload
+     */
+    private function encodeJson(array $payload): string
+    {
+        $precision = (string) ini_get('serialize_precision');
+        ini_set('serialize_precision', '-1');
+
+        try {
+            return json_encode($payload, JSON_THROW_ON_ERROR);
+        } finally {
+            ini_set('serialize_precision', $precision);
+        }
     }
 
     /**
