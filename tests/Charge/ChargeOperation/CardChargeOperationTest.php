@@ -82,6 +82,40 @@ final class CardChargeOperationTest extends AbstractChargeOperationTestCase
     }
 
     #[Test]
+    public function itSendsAmountsWithoutFloatNoiseRegardlessOfSerializePrecision(): void
+    {
+        $previousPrecision = (string) ini_get('serialize_precision');
+        // Misconfigured hosts render 0.05 as 0.050000000000000003 with this value.
+        ini_set('serialize_precision', '17');
+
+        try {
+            $history = [];
+            $operation = $this->createOperationWithMockResponses([$this->successResponse()], $history);
+
+            $params = (new CreateChargeParams())
+                ->amount(0.05)
+                ->method(ChargeMethod::CARD)
+                ->terminal(new Terminal(1))
+                ->productType(ProductType::PAYMENT_GATEWAY)
+                ->currency(Currency::EUR)
+                ->description('Small charge')
+                ->originChannel(OriginChannel::API)
+                ->redirectUrl('https://miapp.com/return')
+                ->orderId(OrderId::fromString(self::ORDER_ID))
+            ;
+
+            $operation->create($params);
+
+            $request = $history[0]['request'];
+            $this->assertStringContainsString('"amount":0.05,', (string) $request->getBody());
+            $this->assertSame('application/json', $request->getHeaderLine('Content-Type'));
+            $this->assertSame('17', ini_get('serialize_precision'));
+        } finally {
+            ini_set('serialize_precision', $previousPrecision);
+        }
+    }
+
+    #[Test]
     public function itRejectsMalformedNumericApiResponseFields(): void
     {
         $history = [];
